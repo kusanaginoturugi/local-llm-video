@@ -26,7 +26,7 @@ OUT = os.path.join(ROOT, "video", "out")
 
 W, H, FPS = 1920, 1080, 30
 SIDE = 440                         # 左右のキャラの列の幅（左右で同じ）
-SLIDE_BOX = (SIDE, 64, W - SIDE, 800)   # 画面（スライド）を置く範囲
+SLIDE_BOX = (80, 64, W - 80, 812)   # 画面（スライド）を置く範囲。下の角にはキャラが少しかぶる
 SUB_BOX = (SIDE, 828, W - SIDE, 1052)  # 字幕
 BG = (24, 26, 33)
 PANEL = (40, 43, 54)
@@ -154,8 +154,9 @@ def draw_slide(img, spec, section):
         widths = [w * scale for w in widths]
         y = y0 + 150
         rh = 80
+        tx = x0 + (x1 - x0 - sum(widths)) / 2  # 表は画面の中央に置く
         for ri, row in enumerate([header] + rows):
-            x = x0 + 40
+            x = tx
             fill = PANEL if ri == 0 else ((70, 62, 30) if ri - 1 in hl else (32, 35, 44))
             d.rectangle((x, y, x + sum(widths), y + rh - 6), fill=fill)
             for c, cell in enumerate(row):
@@ -378,6 +379,8 @@ def frame_at(base, line, t, chars, talking=True):
 
 SD_DIR = os.path.join(ROOT, "assets", "official", "sd")
 BUST_H = 387       # 画面でのバストショットの高さ（px）
+# キャラごとの大きさの倍率。めたんは髪が大きく顔も大きく見えるので、ずんだもんと顔の大きさをそろえる
+CHAR_SCALE = {"met": 0.75, "zun": 1.0}
 # SD 絵ごとの切り出す下端（絵の上からの割合）。あごの少し下、胸のあたりで切る。
 # ポーズで顔の高さが違うので絵ごとに決める（しゃがんだ絵は顔が下にあるので大きめ）
 BUST_BOTTOM = {
@@ -393,7 +396,8 @@ def bust(im, key):
     """SD 絵の頭から胸までを切り出し、高さを BUST_H にそろえる。横にはみ出す分は中央で切る。"""
     im = im.crop(im.getbbox())
     im = im.crop((0, 0, im.width, round(im.height * BUST_BOTTOM.get(key, 0.62))))
-    im = im.resize((round(im.width * BUST_H / im.height), BUST_H), Image.LANCZOS)
+    h = round(BUST_H * CHAR_SCALE[key[:3]])
+    im = im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
     max_w = SIDE - 16
     if im.width > max_w:
         left = (im.width - max_w) // 2
