@@ -165,9 +165,13 @@ def draw_slide(img, spec, section):
 
 
 def load_annotations():
-    """dict.tsv で annotate=yes の用語 → 読み。"""
-    with open(os.path.join(ROOT, "voice", "dict.tsv"), newline="") as f:
-        return {r["surface"]: r["reading"] for r in csv.DictReader(f, delimiter="\t") if r.get("annotate") == "yes"}
+    """dict_common.tsv と dict_episode.tsv で annotate=yes の用語 → 読み。"""
+    out = {}
+    for name in ("dict_common.tsv", "dict_episode.tsv"):
+        with open(os.path.join(ROOT, "voice", name), newline="") as f:
+            out.update({r["surface"]: r["reading"] for r in csv.DictReader(f, delimiter="\t")
+                        if r.get("annotate") == "yes"})
+    return out
 
 
 def annotate(lines):

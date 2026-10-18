@@ -7,7 +7,11 @@
   python3 synth.py --kana       # 合成せず、英字を含む行の読み（カナ）を表示する
   python3 synth.py --kana all   # 合成せず、全行の読みを表示する
 
-読みの置き換えは dict.tsv で行う（VOICEVOX のユーザー辞書は変更しない）。
+読みの置き換えは 3 段で行う（VOICEVOX のユーザー辞書は変更しない）。
+  1. direction.tsv の yomi 列: その行だけの読み（例: 九割五分=きゅうわりごぶ;黄色=きいろ）
+  2. dict_episode.tsv: この動画だけで使う語
+  3. dict_common.tsv: シリーズ共通の技術用語
+英字の語は単語の区切りでだけ置き換える（ini が Gemini に当たらないように）。
 行ごとの演出（スタイル・抑揚・前の間・動き）は direction.tsv で指定する。
 """
 import argparse
@@ -36,10 +40,25 @@ def load_tsv(name):
         return list(csv.DictReader(f, delimiter="\t"))
 
 
-def apply_dict(text, words):
-    # 長い表記から先に置き換える（Linux より Arch Linux を優先するため）
-    for w in sorted(words, key=lambda w: len(w["surface"]), reverse=True):
-        text = text.replace(w["surface"], w["reading"])
+def replace_words(text, words):
+    """表記 → 読みの置き換え。長い表記から先に当てる（Linux より Arch Linux を優先）。"""
+    for surface, reading in sorted(words, key=lambda w: len(w[0]), reverse=True):
+        if surface.isascii():
+            # 英字の語の途中には当てない（CUDA0 のように数字が続くのは当てる）
+            text = re.sub(rf"(?<![A-Za-z0-9_]){re.escape(surface)}(?![A-Za-z_])", reading, text)
+        else:
+            text = text.replace(surface, reading)
+    return text
+
+
+def line_words(yomi):
+    """direction.tsv の yomi 列（表記=読み;表記=読み）を分解する。"""
+    return [tuple(p.split("=", 1)) for p in (yomi or "").split(";") if "=" in p]
+
+
+def apply_dict(text, yomi, episode, common):
+    for words in (line_words(yomi), episode, common):
+        text = replace_words(text, words)
     # 日本語と英数字の間の半角スペースは読み上げで間が空くので取り除く
     return re.sub(r"(?<=[^\x00-\x7f]) +| +(?=[^\x00-\x7f])", "", text)
 
@@ -98,7 +117,8 @@ def main():
     args = ap.parse_args()
 
     rows = load_tsv("script.tsv")
-    words = load_tsv("dict.tsv")
+    episode = [(w["surface"], w["reading"]) for w in load_tsv("dict_episode.tsv")]
+    common = [(w["surface"], w["reading"]) for w in load_tsv("dict_common.tsv")]
     direction = {d["no"]: d for d in load_tsv("direction.tsv")}
     styles = style_ids()
     only = {int(n) for n in args.only.split(",")} if args.only else None
@@ -108,7 +128,8 @@ def main():
     if args.kana:
         for r in rows:
             if args.kana == "all" or any(c.isascii() and c.isalpha() for c in r["text"]):
-                q = make_query(apply_dict(r["text"], words), voice_for(r, direction, styles))
+                q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), episode, common),
+                               voice_for(r, direction, styles))
                 print(f"{r['no']:>3} {r['text']}\n    {q['kana']}")
         return
 
@@ -120,7 +141,7 @@ def main():
         if only is None and not args.force and os.path.exists(base + ".wav"):
             continue
         spk = voice_for(r, direction, styles)
-        q = make_query(apply_dict(r["text"], words), spk)
+        q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), episode, common), spk)
         with open(base + ".wav", "wb") as f:
             f.write(post("/synthesis", {"speaker": spk["id"]}, q))
         # 口パク用に、モーラごとの長さを含むクエリも残す

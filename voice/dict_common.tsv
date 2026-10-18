@@ -1,0 +1,28 @@
+surface	reading	annotate
+llama.cpp	ラマシーピーピー	yes
+llama-server	ラマサーバー	yes
+llama serve	ラマサーブ	yes
+llama-cli	ラマシーエルアイ	yes
+Hugging Face	ハギングフェイス	yes
+GGUF	ジージーユーエフ	yes
+LLM	エルエルエム	yes
+VRAM	ブイラム	yes
+KV	ケーブイ	yes
+OOM	オーオーエム	yes
+nvtop	エヌブイトップ	yes
+systemd	システムディー	yes
+journalctl	ジャーナルシーティーエル	yes
+Qwen	クウェン	yes
+Gemma	ジェマ	yes
+Q4_K_M	キューフォーケーエム	yes
+-hf	ハイフンエイチエフ	yes
+Ctrl+C	コントロールシイ	
+ChatGPT	チャットジーピーティー	
+OpenAI	オープンエーアイ	
+Arch Linux	アーチリナックス	
+Linux	リナックス	
+pacman	パックマン	
+winget	ウィンゲット	
+brew	ブルー	
+CUDA	クーダ	
+RTX	アールティーエックス	

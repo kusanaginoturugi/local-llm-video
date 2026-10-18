@@ -1,0 +1,5 @@
+surface	reading	annotate
+llama-fit-params	ラマフィットパラムズ	yes
+n-gpu-layers	エヌジーピーユーレイヤーズ	yes
+--models-max	モデルズマックス	yes
+Use this model	ユーズディスモデル	

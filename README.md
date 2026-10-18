@@ -14,8 +14,9 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | パス | 中身 |
 | --- | --- |
 | `voice/script.tsv` | 台本（行番号・話者・セリフ） |
-| `voice/direction.tsv` | 行ごとの演出（声のスタイル・抑揚・前の間・動き） |
-| `voice/dict.tsv` | 読み方の置き換えと、字幕で読みを添える用語 |
+| `voice/direction.tsv` | 行ごとの演出（声のスタイル・抑揚・前の間・動き）と、その行だけの読み（`yomi`） |
+| `voice/dict_common.tsv` | シリーズ共通の読み（毎回出てくる技術用語） |
+| `voice/dict_episode.tsv` | この動画だけで使う読み |
 | `voice/synth.py` | VOICEVOX で一括合成し、`voice/out/` に wav とタイムラインを出す |
 | `video/screens.tsv` | 行ごとのセクション名と、台本の「画面」欄 |
 | `video/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど） |
@@ -42,6 +43,10 @@ python3 video/make_bgm.py        # BGM を合成
 python3 voice/synth.py           # 音声を合成（--kana all で読みの確認）
 python3 video/render.py          # 動画と概要欄を作る
 ```
+
+読みの置き換えは、行ごとの読み（`direction.tsv` の `yomi` 列、例 `九割五分=きゅうわりごぶ;黄色=きいろ`）→ この動画の辞書 → シリーズ共通の辞書の順に当てます。
+VOICEVOX 本体のユーザー辞書は変更しません。英字の語は単語の区切りでだけ置き換えます（`ini` は `Gemini` には当たりません）。
+1 か所だけの読み間違いは辞書に入れず、行ごとの読みで直してください。`annotate` 列が `yes` の語は、字幕で最初に出たときだけ「VRAM（ブイラム）」のように読みを添えます。
 
 確認用に、`video/render.py --preview 30`（先頭 30 秒）、`--still 64`（64 行目の 1 コマ）、`--description`（概要欄だけ）が使えます。
 
