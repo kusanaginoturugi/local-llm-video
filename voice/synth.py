@@ -15,7 +15,9 @@
 行ごとの演出（スタイル・抑揚・前の間・動き）は direction.tsv で指定する。
 """
 import argparse
+import array
 import csv
+import math
 import json
 import os
 import re
@@ -27,10 +29,10 @@ import wave
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENGINE = os.environ.get("VOICEVOX_URL", "http://localhost:50021")
 
-# 話者ごとの設定。id は VOICEVOX のスタイル ID
+# 話者ごとの設定。id は VOICEVOX のスタイル ID、pan は左右の位置（-1 左 〜 0 中央 〜 1 右）
 SPEAKERS = {
-    "めたん": {"slug": "metan", "id": 2, "speedScale": 1.0},
-    "ずんだもん": {"slug": "zundamon", "id": 3, "speedScale": 1.18},
+    "めたん": {"slug": "metan", "id": 2, "speedScale": 1.0, "pan": -0.35},
+    "ずんだもん": {"slug": "zundamon", "id": 3, "speedScale": 1.18, "pan": 0.35},
 }
 GAP_SEC = 0.35  # all.wav で行と行の間に入れる無音（direction.tsv の gap で上書き）
 
@@ -103,6 +105,17 @@ def make_query(text, spk):
     return q
 
 
+def pan_stereo(frames, pan):
+    """16bit モノラルを、左右の音量の合計が変わらない配分（定パワーパン）でステレオにする。"""
+    angle = (pan + 1) * math.pi / 4
+    gl, gr = math.cos(angle) * math.sqrt(2), math.sin(angle) * math.sqrt(2)
+    mono = array.array("h", frames)
+    out = array.array("h", bytes(len(frames) * 2))
+    out[0::2] = array.array("h", (max(-32768, min(32767, int(v * gl))) for v in mono))
+    out[1::2] = array.array("h", (max(-32768, min(32767, int(v * gr))) for v in mono))
+    return out.tobytes()
+
+
 def wav_frames(path):
     with wave.open(path, "rb") as w:
         return w.getparams(), w.readframes(w.getnframes())
@@ -162,14 +175,14 @@ def main():
         d = direction.get(r["no"], {})
         if chunks:  # 1 行目の前には間を入れない
             gap = float(d["gap"]) if d.get("gap") else GAP_SEC
-            chunks.append(b"\0" * int(gap * p.framerate) * p.sampwidth * p.nchannels)
+            chunks.append(b"\0" * int(gap * p.framerate) * p.sampwidth * 2)
             t += gap
         dur = len(frames) / (p.sampwidth * p.nchannels * p.framerate)
         timeline.append((no, r["speaker"], round(t, 3), round(t + dur, 3), d.get("motion", ""), r["text"]))
-        chunks.append(frames)
+        chunks.append(pan_stereo(frames, spk["pan"]))  # 立ち位置に合わせて左右に振る
         t += dur
     with wave.open(os.path.join(out_dir, "all.wav"), "wb") as w:
-        w.setparams(params)
+        w.setparams(params._replace(nchannels=2))
         w.writeframes(b"".join(chunks))
     with open(os.path.join(out_dir, "timeline.tsv"), "w") as f:
         f.write("no\tspeaker\tstart\tend\tmotion\ttext\n")
