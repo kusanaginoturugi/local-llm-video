@@ -242,7 +242,7 @@ def mouth_track(query, start):
 def load_chars():
     chars = {}
     for name, slug in SLUG.items():
-        frames = [Image.open(os.path.join(CHARS, f"{slug}_{i}.png")).convert("RGBA") for i in range(3)]
+        frames = [bust(Image.open(os.path.join(CHARS, f"{slug}_{i}.png")).convert("RGBA"), slug) for i in range(3)]
         dim = []
         for fr in frames:
             dark = Image.new("RGBA", fr.size, (0, 0, 0, 0))
@@ -257,7 +257,7 @@ def load_chars():
 def char_pos(name, im):
     """左右の列の中央に、足元をそろえて置く。"""
     x = (SIDE - im.width) // 2
-    return (x if name == "めたん" else W - SIDE + x, H - im.height - 8)
+    return (x if name == "めたん" else W - SIDE + x, H - im.height)  # 胸で画面の下端に切れる
 
 
 def motion_offset(kind, dt):
@@ -377,17 +377,34 @@ def frame_at(base, line, t, chars, talking=True):
 
 
 SD_DIR = os.path.join(ROOT, "assets", "official", "sd")
-CHAR_H = 580  # SD 絵の高さ（px）。make_mouths.py と合わせる
+BUST_H = 387       # 画面でのバストショットの高さ（px）
+# SD 絵ごとの切り出す下端（絵の上からの割合）。あごの少し下、胸のあたりで切る。
+# ポーズで顔の高さが違うので絵ごとに決める（しゃがんだ絵は顔が下にあるので大きめ）
+BUST_BOTTOM = {
+    "metan": 0.58, "met_s214": 0.62, "met_s215": 0.72, "met_s218": 0.66, "met_s221": 0.63, "met_s222": 0.63,
+    "zundamon": 0.66, "zunmon_3009": 0.82, "zunmon_3013": 0.75, "zunmon_3015": 0.7, "zunmon_3016": 0.76,
+    "zunmon_3017": 0.80, "zunmon_3019": 0.74, "zunmon_3020": 0.78, "zunmon_3021": 0.68, "zunmon_3022": 0.76,
+    "zunmon_3030": 0.9,
+}
 _sd = {}
 
 
+def bust(im, key):
+    """SD 絵の頭から胸までを切り出し、高さを BUST_H にそろえる。横にはみ出す分は中央で切る。"""
+    im = im.crop(im.getbbox())
+    im = im.crop((0, 0, im.width, round(im.height * BUST_BOTTOM.get(key, 0.62))))
+    im = im.resize((round(im.width * BUST_H / im.height), BUST_H), Image.LANCZOS)
+    max_w = SIDE - 16
+    if im.width > max_w:
+        left = (im.width - max_w) // 2
+        im = im.crop((left, 0, left + max_w, im.height))
+    return im
+
+
 def sd_image(name):
-    """リアクション用の SD 絵。ふだんの絵と同じ高さ（横に広い絵は列の幅）にそろえる。"""
+    """リアクション用の SD 絵（バストショット）。"""
     if name not in _sd:
-        im = Image.open(os.path.join(SD_DIR, name + ".png")).convert("RGBA")
-        im = im.crop(im.getbbox())
-        r = min(CHAR_H / im.height, (SIDE - 16) / im.width)  # 横に広い絵は列の幅に収める
-        _sd[name] = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+        _sd[name] = bust(Image.open(os.path.join(SD_DIR, name + ".png")).convert("RGBA"), name)
     return _sd[name]
 
 
