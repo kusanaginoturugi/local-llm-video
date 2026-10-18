@@ -52,29 +52,38 @@ def save(im, name, bbox, face_x, bust=BUST):
     im.save(os.path.join(OUT, name))
 
 
-# めたん: 元の絵は閉じ口。半開きと開き口を描き足す
-met = Image.open(os.path.join(SRC, "met012.png")).convert("RGBA")
-met_bbox = met.getbbox()
-save(met, "metan_0.png", met_bbox, 2452)
-save(open_mouth(met, 2452, 2542, 70, 34), "metan_1.png", met_bbox, 2452)
-save(open_mouth(met, 2452, 2550, 82, 64), "metan_2.png", met_bbox, 2452)
+CHAR_H = 580  # 動画内での SD 絵の高さ（px）。render.py と合わせる
 
-# ずんだもん: 元の絵は開き口。閉じ口と半開きを作る（耳の分だけ背が高いので狭めに切り出す）
-zun = Image.open(os.path.join(SRC, "zunmon003.png")).convert("RGBA")
-zun_bbox = zun.getbbox()
-closed = close_mouth(zun, (1925, 2665, 2110, 2815), [(1960, 2725), (2010, 2745), (2065, 2725)])
-save(closed, "zundamon_0.png", zun_bbox, 2014, bust=0.36)
-save(open_mouth(closed, 2014, 2740, 90, 50), "zundamon_1.png", zun_bbox, 2014, bust=0.36)
-save(zun, "zundamon_2.png", zun_bbox, 2014, bust=0.36)
+
+def save_sd(im, name):
+    im = im.crop(im.getbbox())
+    im = im.resize((round(im.width * CHAR_H / im.height), CHAR_H), Image.LANCZOS)
+    im.save(os.path.join(OUT, name))
+
+
+SD = os.path.join(SRC, "sd")
+
+# めたん（SD・met_s209）: 元の絵は閉じ口。半開きと開き口を描き足す
+met = Image.open(os.path.join(SD, "met_s209.png")).convert("RGBA")
+save_sd(met, "metan_0.png")
+save_sd(open_mouth(met, 3102, 3745, 150, 70), "metan_1.png")
+save_sd(open_mouth(met, 3102, 3760, 180, 130), "metan_2.png")
+
+# ずんだもん（SD・zunmon_3002）: 元の絵は開き口。閉じ口と半開きを作る
+zun = Image.open(os.path.join(SD, "zunmon_3002.png")).convert("RGBA")
+closed = close_mouth(zun, (3205, 3975, 3590, 4185), [(3290, 4070), (3395, 4105), (3500, 4070)])
+save_sd(closed, "zundamon_0.png")
+save_sd(open_mouth(closed, 3395, 4080, 220, 110), "zundamon_1.png")
+save_sd(zun, "zundamon_2.png")
 
 # 確認用に口元を並べた画像
 row = []
-for n in ["metan", "zundamon"]:
+for n, (fx, fy) in (("metan", (0.52, 0.41)), ("zundamon", (0.50, 0.53))):
     for i in range(3):
         im = Image.open(os.path.join(OUT, f"{n}_{i}.png"))
         w, h = im.size
-        c = im.crop((int(w * 0.25), int(h * 0.25), int(w * 0.75), int(h * 0.60))).resize((240, 180), Image.LANCZOS)
-        row.append(c)
+        cx, cy = int(w * fx), int(h * fy)
+        row.append(im.crop((cx - 80, cy - 60, cx + 80, cy + 60)).resize((240, 180), Image.LANCZOS))
 sheet = Image.new("RGBA", (240 * 6, 180), (200, 200, 200, 255))
 for i, c in enumerate(row):
     sheet.alpha_composite(c, (240 * i, 0))

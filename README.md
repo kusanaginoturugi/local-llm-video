@@ -20,10 +20,10 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `voice/synth.py` | VOICEVOX で一括合成し、`voice/out/` に wav とタイムラインを出す |
 | `video/screens.tsv` | 行ごとのセクション名と、台本の「画面」欄 |
 | `video/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど） |
-| `video/make_mouths.py` | 公式イラストから口パク用の差分（閉じ・半開き・開き）を作る |
+| `video/make_mouths.py` | 公式の SD 絵から口パク用の差分（閉じ・半開き・開き）を作る |
 | `video/render.py` | 動画 `video/out/video.mp4` と概要欄 `video/out/description.txt` を作る |
 | `assets/slides/` | 構成図とスクリーンショット |
-| `assets/fetch_official.sh` | 公式イラスト（立ち絵とリアクション用の SD 絵）を zunko.jp から取ってくる |
+| `assets/fetch_official.sh` | 公式の SD 絵（ふだんの絵とリアクション用の表情違い）を zunko.jp から取ってくる |
 | `assets/fetch_bgm.sh` | BGM（魔王魂）を取ってくる |
 | `assets/bg/rgb_desk.jpg` | 背景写真（CC0） |
 | `demo/models.ini` | 撮影に使ったプリセット（記事と同じ設定） |

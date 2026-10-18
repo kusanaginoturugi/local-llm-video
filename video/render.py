@@ -255,8 +255,9 @@ def load_chars():
 
 
 def char_pos(name, im):
+    """左右の列の中央に、足元をそろえて置く。"""
     x = (SIDE - im.width) // 2
-    return (x if name == "めたん" else W - SIDE + x, H - im.height)
+    return (x if name == "めたん" else W - SIDE + x, H - im.height - 8)
 
 
 def motion_offset(kind, dt):
@@ -346,53 +347,48 @@ def frame_at(base, line, t, chars, talking=True):
     img = base.copy()
     for name in ("めたん", "ずんだもん"):
         frames, dim = chars[name]
-        level, dx, dy = 0, 0, 0
+        dx, dy, scale = 0, 0, 1.0
         if talking and name == line["speaker"]:
-            for s, e, lv in line["track"]:
-                if s <= t < e:
+            dt = t - line["start"]
+            level = 0
+            for s0, e0, lv in line["track"]:
+                if s0 <= t < e0:
                     level = lv
                     break
-            im = frames[level]
-            dx, dy = motion_offset(line["motion"], t - line["start"])
+            if line.get("react"):
+                # リアクションの行は SD 絵ごと差し替え、口パクの代わりに声に合わせて少し弾ませる
+                im = sd_image(line["react"])
+                dy = -4 * level
+                if dt < 0.12:
+                    scale = 0.85 + 0.25 * dt / 0.12   # 0.85 → 1.1
+                elif dt < 0.24:
+                    scale = 1.1 - 0.1 * (dt - 0.12) / 0.12
+            else:
+                im = frames[level]
+            mx, my = motion_offset(line["motion"], dt)
+            dx, dy = dx + mx, dy + my
         else:
             im = frames[0] if not talking else dim[0]
+        if scale != 1.0:
+            im = im.resize((round(im.width * scale), round(im.height * scale)), Image.BILINEAR)
         x, y = char_pos(name, im)
         img.paste(im, (x + dx, y + dy), im)
-    if talking and line.get("react"):
-        draw_react(img, line, t)
     return img
 
 
 SD_DIR = os.path.join(ROOT, "assets", "official", "sd")
-SD_H = 330  # リアクション用 SD 絵の高さ（px）
+CHAR_H = 580  # SD 絵の高さ（px）。make_mouths.py と合わせる
 _sd = {}
 
 
 def sd_image(name):
+    """リアクション用の SD 絵。ふだんの絵と同じ高さ（横に広い絵は列の幅）にそろえる。"""
     if name not in _sd:
         im = Image.open(os.path.join(SD_DIR, name + ".png")).convert("RGBA")
         im = im.crop(im.getbbox())
-        _sd[name] = im.resize((round(im.width * SD_H / im.height), SD_H), Image.LANCZOS)
+        r = min(CHAR_H / im.height, (SIDE - 16) / im.width)  # 横に広い絵は列の幅に収める
+        _sd[name] = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
     return _sd[name]
-
-
-def draw_react(img, line, t):
-    """話しているキャラの列の上に、リアクションの SD 絵を弾むように出す。"""
-    dt = t - line["start"]
-    if dt < 0:
-        return
-    if dt < 0.12:
-        scale = 0.5 + 0.6 * dt / 0.12          # 0.5 → 1.1 に膨らむ
-    elif dt < 0.24:
-        scale = 1.1 - 0.1 * (dt - 0.12) / 0.12  # 1.1 → 1.0 に戻る
-    else:
-        scale = 1.0
-    im = sd_image(line["react"])
-    if scale != 1.0:
-        im = im.resize((max(1, round(im.width * scale)), max(1, round(im.height * scale))), Image.BILINEAR)
-    cx = SIDE // 2 if line["speaker"] == "めたん" else W - SIDE // 2
-    bottom = H - 560 - 6 + int(4 * math.sin(dt * 5))  # 立ち絵の頭の上。ふわふわ揺らす
-    img.paste(im, (cx - im.width // 2, bottom - im.height), im)
 
 
 REPO = "https://github.com/kusanaginoturugi/local-llm-video"
