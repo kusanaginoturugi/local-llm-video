@@ -5,6 +5,7 @@
   python3 render.py --preview 30 # 先頭 30 秒だけ作る（確認用）
   python3 render.py --still 64   # 指定行の 1 コマを out/still_064.png に保存
   python3 render.py --description # 概要欄の文面だけ out/description.txt に書き出す
+  python3 render.py --srt         # 字幕ファイルだけ out/subtitles.srt に書き出す
 """
 import argparse
 import csv
@@ -439,9 +440,21 @@ def write_description(lines):
             chapters.append(f"{t // 60}:{t % 60:02d} {title}")
         prev = ln
     text = "\n".join([
-        "自分のパソコンで LLM サーバーを立ち上げる、ローカル LLM 入門の第1弾です。",
-        "llama.cpp の llama-server をルーターモードで動かし、複数のモデルを切り替えて使える状態にして、",
-        "systemd で常駐させるところまでをやります。",
+        "自分のパソコンで LLM（大規模言語モデル）のサーバーを立ち上げる、「ローカル LLM で遊ぼう」シリーズの第1弾です。",
+        "llama.cpp の llama-server を使い、Hugging Face から落とした 2 つのモデルを 1 つのサーバーで切り替えて使えるようにして、",
+        "systemd で常駐させるところまでを、四国めたんとずんだもんの掛け合いで解説します。",
+        "",
+        "■ この動画で分かること",
+        "・llama.cpp の入手と、Hugging Face でのモデルの探し方",
+        "・コンテキスト長と VRAM の関係（設定なしで起動すると何が起きるか）",
+        "・ルーターモードとプリセット（models.ini）で、モデルごとに設定する方法",
+        "・小さなモデルを 2 つ常駐させて、切り替えを一瞬にする方法",
+        "・OOM（メモリ不足）の見分け方と、llama-fit-params での見積もり",
+        "・systemd で常駐させる方法",
+        "",
+        "■ 撮影環境",
+        "Arch 系 Linux / NVIDIA GeForce RTX 4070（VRAM 12GB）/ llama.cpp build 11429",
+        "モデル: Gemma 4 E4B（Q4_K_M）、Qwen3 4B（Q4_K_M）",
         "",
         "■ 目次",
         *chapters,
@@ -471,10 +484,24 @@ def write_description(lines):
         "素敵な音声合成を作っていただいた皆様。",
         "生成 AI という、とてつもなく全く新しく面白くて強力なアシスタントを作ってくれた方々。",
         "そして、動画作成のきっかけを与えてくれた友達。ありがとうございます。",
+        "",
+        "#ローカルLLM #llamacpp #ずんだもん #四国めたん #VOICEVOX",
     ])
     with open(os.path.join(OUT, "description.txt"), "w") as f:
         f.write(text + "\n")
     return text
+
+
+def write_srt(lines):
+    """YouTube にアップロードする字幕ファイル（SRT）を書き出す。"""
+    def ts(t):
+        ms = round(t * 1000)
+        return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
+    path = os.path.join(OUT, "subtitles.srt")
+    with open(path, "w") as f:
+        for i, ln in enumerate(lines, 1):
+            f.write(f"{i}\n{ts(ln['start'])} --> {ts(ln['end'])}\n{ln['speaker']}：{ln['text']}\n\n")
+    return path
 
 
 def main():
@@ -482,11 +509,16 @@ def main():
     ap.add_argument("--preview", type=float, help="先頭から指定秒だけ作る")
     ap.add_argument("--still", type=int, help="指定行の 1 コマを PNG で保存")
     ap.add_argument("--description", action="store_true", help="概要欄の文面だけ書き出す")
+    ap.add_argument("--srt", action="store_true", help="字幕ファイル（SRT）だけ書き出す")
     args = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
 
     lines = load_lines()
     chars = load_chars()
+
+    if args.srt:
+        print(write_srt(lines))
+        return
 
     if args.description:
         print(write_description(lines))

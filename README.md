@@ -22,7 +22,8 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `video/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど） |
 | `video/make_mouths.py` | 公式の SD 絵から口パク用の差分（閉じ・半開き・開き）を作る |
 | `video/termshot.py` | コマンドを仮想の端末で動かし、画面を PNG にする（nvtop や llama-cli の撮影に使用。pyte が必要） |
-| `video/render.py` | 動画 `video/out/video.mp4` と概要欄 `video/out/description.txt` を作る |
+| `video/render.py` | 動画 `video/out/video.mp4`、概要欄 `description.txt`、字幕 `subtitles.srt`（`--srt`）を作る |
+| `video/make_thumbnail.py` | サムネイル `video/out/thumbnail.png`（1280x720）を作る |
 | `assets/slides/` | 構成図とスクリーンショット |
 | `assets/fetch_official.sh` | 公式の SD 絵（ふだんの絵とリアクション用の表情違い）を zunko.jp から取ってくる |
 | `assets/fetch_bgm.sh` | BGM（魔王魂）を取ってくる |
