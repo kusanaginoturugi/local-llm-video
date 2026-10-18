@@ -40,6 +40,11 @@ BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔
 BG_IMAGE = os.environ.get("BG_IMAGE", os.path.join(ROOT, "assets", "bg", "rgb_desk.jpg"))  # 背景（ぼかして暗くする）。空なら単色
 BG_BLUR = int(os.environ.get("BG_BLUR", 8))   # ぼかしの強さ（ガウスぼかしの半径 px）
 BG_DARK = float(os.environ.get("BG_DARK", 0.55))  # 明るさ（0〜1）
+# 映像のエンコーダ。NVIDIA の GPU があれば NVENC、なければ VCODEC=x264 で libx264 を使う
+VIDEO_CODEC = {
+    "nvenc": ["-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr", "-cq", "21", "-b:v", "0"],
+    "x264": ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20"],
+}[os.environ.get("VCODEC", "nvenc")]
 BGM_VOLUME = 0.12
 BGM_FILTER = "highpass=f=150,lowpass=f=3500"  # 帯域を絞って声の後ろに下げる（空にすると原音のまま）
 
@@ -344,30 +349,34 @@ def section_card(section):
     return img
 
 
-def frame_at(base, line, t, chars, talking=True):
+def speaker_state(line, t):
+    """話している側の見た目を決める値（口の開き、位置のずれ、拡大率）。同じなら同じ絵になる。"""
+    dt = t - line["start"]
+    level = 0
+    for s0, e0, lv in line["track"]:
+        if s0 <= t < e0:
+            level = lv
+            break
+    dx, dy, scale = 0, 0, 1.0
+    if line.get("react"):
+        # リアクションの行は SD 絵ごと差し替え、口パクの代わりに声に合わせて少し弾ませる
+        dy = -4 * level
+        if dt < 0.12:
+            scale = 0.85 + 0.25 * dt / 0.12   # 0.85 → 1.1
+        elif dt < 0.24:
+            scale = 1.1 - 0.1 * (dt - 0.12) / 0.12
+    mx, my = motion_offset(line["motion"], dt)
+    return level, dx + mx, dy + my, round(scale, 3)
+
+
+def frame_at(base, line, t, chars, talking=True, state=None):
     img = base.copy()
     for name in ("めたん", "ずんだもん"):
         frames, dim = chars[name]
         dx, dy, scale = 0, 0, 1.0
         if talking and name == line["speaker"]:
-            dt = t - line["start"]
-            level = 0
-            for s0, e0, lv in line["track"]:
-                if s0 <= t < e0:
-                    level = lv
-                    break
-            if line.get("react"):
-                # リアクションの行は SD 絵ごと差し替え、口パクの代わりに声に合わせて少し弾ませる
-                im = sd_image(line["react"])
-                dy = -4 * level
-                if dt < 0.12:
-                    scale = 0.85 + 0.25 * dt / 0.12   # 0.85 → 1.1
-                elif dt < 0.24:
-                    scale = 1.1 - 0.1 * (dt - 0.12) / 0.12
-            else:
-                im = frames[level]
-            mx, my = motion_offset(line["motion"], dt)
-            dx, dy = dx + mx, dy + my
+            level, dx, dy, scale = state or speaker_state(line, t)
+            im = sd_image(line["react"]) if line.get("react") else frames[level]
         else:
             im = frames[0] if not talking else dim[0]
         if scale != 1.0:
@@ -507,11 +516,12 @@ def main():
            "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
            "-i", audio, "-stream_loop", "-1", "-i", BGM,
            "-filter_complex", afilter, "-map", "0:v", "-map", "[a]", "-t", f"{total:.3f}",
-           "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
+           *VIDEO_CODEC, "-pix_fmt", "yuv420p",
            "-c:a", "aac", "-b:a", "192k", os.path.join(OUT, name)]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
 
     li, base, card, card_for = 0, None, None, None
+    prev_key, prev_bytes = None, None
     for i in range(n_frames):
         t = i / FPS
         # 次の行の開始時刻を過ぎたら行を進める（行間の無音は前の行の画面のまま）
@@ -526,10 +536,17 @@ def main():
                 and nxt["start"] - lines[li]["end"] >= 1.0):
             if card_for != nxt["section"]:
                 card, card_for = section_card(nxt["section"]), nxt["section"]
-            frame = frame_at(card, lines[li], t, chars, talking=False)
+            key = ("card", card_for)
+            if key != prev_key:
+                prev_bytes = frame_at(card, lines[li], t, chars, talking=False).tobytes()
         else:
-            frame = frame_at(base, lines[li], t, chars)
-        ff.stdin.write(frame.tobytes())
+            state = speaker_state(lines[li], t)
+            key = (li, state)
+            # 口の開き・位置・拡大率が前のコマと同じなら、組み立て直さずに使い回す
+            if key != prev_key:
+                prev_bytes = frame_at(base, lines[li], t, chars, state=state).tobytes()
+        prev_key = key
+        ff.stdin.write(prev_bytes)
         if i % (FPS * 30) == 0:
             print(f"{t:6.0f} / {total:.0f} 秒", file=sys.stderr)
     ff.stdin.close()
