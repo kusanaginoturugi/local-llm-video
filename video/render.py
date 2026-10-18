@@ -36,8 +36,12 @@ HL = (255, 214, 102)
 COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70)}
 SLUG = {"めたん": "metan", "ずんだもん": "zundamon"}
 ANNOTATE_ONCE = True  # False にすると、用語が出るたびに毎回読みを添える
-BGM = os.path.join(ROOT, "assets", "bgm", "bgm_loop.wav")
-BGM_VOLUME = 0.22
+BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔王魂「アコースティック51」ループ版
+BG_IMAGE = os.environ.get("BG_IMAGE", os.path.join(ROOT, "assets", "bg", "rgb_desk.jpg"))  # 背景（ぼかして暗くする）。空なら単色
+BG_BLUR = int(os.environ.get("BG_BLUR", 8))   # ぼかしの強さ（ガウスぼかしの半径 px）
+BG_DARK = float(os.environ.get("BG_DARK", 0.55))  # 明るさ（0〜1）
+BGM_VOLUME = 0.12
+BGM_FILTER = "highpass=f=150,lowpass=f=3500"  # 帯域を絞って声の後ろに下げる（空にすると原音のまま）
 
 JP = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
 JP_BOLD = "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"
@@ -271,6 +275,8 @@ def load_lines():
         tl = list(csv.DictReader(f, delimiter="\t"))
     with open(os.path.join(ROOT, "video", "screens.tsv"), newline="") as f:
         sections = {r["no"]: r["section"] for r in csv.DictReader(f, delimiter="\t")}
+    with open(os.path.join(ROOT, "voice", "direction.tsv"), newline="") as f:
+        reacts = {r["no"]: r.get("react", "") for r in csv.DictReader(f, delimiter="\t")}
     lines, spec = [], SLIDES[1]
     for r in tl:
         no = int(r["no"])
@@ -281,14 +287,43 @@ def load_lines():
             "no": no, "speaker": r["speaker"], "text": r["text"],
             "start": float(r["start"]), "end": float(r["end"]),
             "section": sections.get(r["no"], ""), "spec": spec, "motion": r.get("motion", ""),
+            "react": reacts.get(r["no"], ""),
             "track": mouth_track(q, float(r["start"])),
         })
     annotate(lines)
     return lines
 
 
+_background = None
+
+
+def background():
+    """背景の 1 枚を作る。画像があれば画面いっぱいに切り出し、ぼかして暗くする。"""
+    global _background
+    if _background is None:
+        if BG_IMAGE:
+            from PIL import ImageFilter, ImageEnhance
+            im = Image.open(BG_IMAGE).convert("RGB")
+            r = max(W / im.width, H / im.height)
+            im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+            im = im.crop(((im.width - W) // 2, (im.height - H) // 2, (im.width - W) // 2 + W, (im.height - H) // 2 + H))
+            im = im.filter(ImageFilter.GaussianBlur(BG_BLUR))
+            im = ImageEnhance.Brightness(im).enhance(BG_DARK)
+            # 画面と字幕の下に半透明の板を敷いて、文字を読みやすくする
+            panel = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+            d = ImageDraw.Draw(panel)
+            x0, y0, x1, y1 = SLIDE_BOX
+            d.rounded_rectangle((x0 - 20, y0 - 50, x1 + 20, y1 + 16), 28, fill=BG + (150,))
+            im = im.convert("RGBA")
+            im.alpha_composite(panel)
+            _background = im.convert("RGB")
+        else:
+            _background = Image.new("RGB", (W, H), BG)
+    return _background
+
+
 def base_frame(line):
-    img = Image.new("RGB", (W, H), BG)
+    img = background().copy()
     draw_slide(img, line["spec"], line["section"])
     draw_subtitle(img, line["speaker"], line["subtitle"])
     return img
@@ -296,7 +331,7 @@ def base_frame(line):
 
 def section_card(section):
     """セクションの変わり目に出す見出し。"""
-    img = Image.new("RGB", (W, H), BG)
+    img = background().copy()
     d = ImageDraw.Draw(img)
     num, _, title = section.partition(". ")
     cx, cy = W / 2, (SLIDE_BOX[1] + SLIDE_BOX[3]) / 2
@@ -323,7 +358,41 @@ def frame_at(base, line, t, chars, talking=True):
             im = frames[0] if not talking else dim[0]
         x, y = char_pos(name, im)
         img.paste(im, (x + dx, y + dy), im)
+    if talking and line.get("react"):
+        draw_react(img, line, t)
     return img
+
+
+SD_DIR = os.path.join(ROOT, "assets", "official", "sd")
+SD_H = 330  # リアクション用 SD 絵の高さ（px）
+_sd = {}
+
+
+def sd_image(name):
+    if name not in _sd:
+        im = Image.open(os.path.join(SD_DIR, name + ".png")).convert("RGBA")
+        im = im.crop(im.getbbox())
+        _sd[name] = im.resize((round(im.width * SD_H / im.height), SD_H), Image.LANCZOS)
+    return _sd[name]
+
+
+def draw_react(img, line, t):
+    """話しているキャラの列の上に、リアクションの SD 絵を弾むように出す。"""
+    dt = t - line["start"]
+    if dt < 0:
+        return
+    if dt < 0.12:
+        scale = 0.5 + 0.6 * dt / 0.12          # 0.5 → 1.1 に膨らむ
+    elif dt < 0.24:
+        scale = 1.1 - 0.1 * (dt - 0.12) / 0.12  # 1.1 → 1.0 に戻る
+    else:
+        scale = 1.0
+    im = sd_image(line["react"])
+    if scale != 1.0:
+        im = im.resize((max(1, round(im.width * scale)), max(1, round(im.height * scale))), Image.BILINEAR)
+    cx = SIDE // 2 if line["speaker"] == "めたん" else W - SIDE // 2
+    bottom = H - 560 - 6 + int(4 * math.sin(dt * 5))  # 立ち絵の頭の上。ふわふわ揺らす
+    img.paste(im, (cx - im.width // 2, bottom - im.height), im)
 
 
 REPO = "https://github.com/kusanaginoturugi/local-llm-video"
@@ -354,7 +423,7 @@ def write_description(lines):
         f"記事: {ARTICLE}",
         f"台本: {SCRIPT_DOC}",
         "",
-        "■ ソースコード（台本・音声合成・動画生成・BGM）",
+        "■ ソースコード（台本・音声合成・動画生成）",
         REPO,
         "",
         "■ 制作",
@@ -364,7 +433,9 @@ def write_description(lines):
         "■ クレジット",
         "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん",
         "イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成",
-        f"BGM: オリジナル（Claude Code でプログラムから合成） {REPO}/blob/main/video/make_bgm.py",
+        "BGM: 魔王魂「アコースティック51」 https://maou.audio/bgm_acoustic51/ （CC BY 4.0）",
+        "背景写真: SankalpSasnur「RGB desktop computer setup with keyboard and monitor」（CC0）",
+        "https://commons.wikimedia.org/wiki/File:RGB_desktop_computer_setup_with_keyboard_and_monitor.jpg",
     ])
     with open(os.path.join(OUT, "description.txt"), "w") as f:
         f.write(text + "\n")
@@ -402,7 +473,7 @@ def main():
     # BGM はセリフの間だけ音量を下げる（sidechaincompress）。最初と最後はフェード
     afilter = (
         "[1:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit[voice][key];"
-        f"[2:a]aformat=sample_rates=48000:channel_layouts=stereo,volume={BGM_VOLUME},"
+        f"[2:a]aformat=sample_rates=48000:channel_layouts=stereo,{BGM_FILTER + ',' if BGM_FILTER else ''}volume={BGM_VOLUME},"
         f"afade=t=in:d=2,afade=t=out:st={max(0, total - 4):.2f}:d=4[bgm];"
         "[bgm][key]sidechaincompress=threshold=0.02:ratio=6:attack=40:release=700[duck];"
         "[voice][duck]amix=inputs=2:normalize=0:duration=longest[a]"
