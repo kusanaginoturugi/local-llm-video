@@ -449,6 +449,14 @@ def write_description(lines):
         "BGM: 魔王魂「アコースティック51」 https://maou.audio/bgm_acoustic51/ （CC BY 4.0）",
         "背景写真: SankalpSasnur「RGB desktop computer setup with keyboard and monitor」（CC0）",
         "https://commons.wikimedia.org/wiki/File:RGB_desktop_computer_setup_with_keyboard_and_monitor.jpg",
+        "",
+        "■ 謝辞",
+        "オープンソースでツールを作ってくれた皆様方。",
+        "素晴らしい楽曲をクリエイティブ・コモンズで公開してくれている作曲者様。",
+        "可愛い絵柄のずんだもんたちを描いてくれた絵師さん。",
+        "素敵な音声合成を作っていただいた皆様。",
+        "生成 AI という、とてつもなく全く新しく面白くて強力なアシスタントを作ってくれた方々。",
+        "そして、動画作成のきっかけを与えてくれた友達。ありがとうございます。",
     ])
     with open(os.path.join(OUT, "description.txt"), "w") as f:
         f.write(text + "\n")
