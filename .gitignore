@@ -1,0 +1,16 @@
+# 公式イラストとそこから作った口パク画像（再配布しない。assets/fetch_official.sh で取得）
+assets/official/
+assets/chars/
+
+# 生成物（スクリプトで作り直せる）
+assets/bgm/
+voice/out/
+video/out/
+voice/kana.txt
+video/renumber.txt
+
+# テスト用サーバーのモデルキャッシュとログ
+demo/cache/
+demo/*.log
+
+__pycache__/

@@ -1,0 +1,57 @@
+# ローカル LLM で遊ぼう（動画制作）
+
+YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作るためのリポジトリです。
+台本から VOICEVOX で音声を合成し、口パクつきの解説動画と概要欄の文面までを生成します。
+
+- 第1弾：llama-server を立ち上げよう
+  - 記事: https://claude.ai/code/artifact/2be896e8-2ab9-4dd7-bf05-cff1beb45e71
+  - 台本: https://claude.ai/code/artifact/45ace86b-536a-4dd5-a09a-cb9db2f17fa1
+
+台本・記事・検証・動画の組み立ては Claude Code、画面の撮影は Claude in Chrome で行いました。
+
+## 構成
+
+| パス | 中身 |
+| --- | --- |
+| `voice/script.tsv` | 台本（行番号・話者・セリフ） |
+| `voice/direction.tsv` | 行ごとの演出（声のスタイル・抑揚・前の間・動き） |
+| `voice/dict.tsv` | 読み方の置き換えと、字幕で読みを添える用語 |
+| `voice/synth.py` | VOICEVOX で一括合成し、`voice/out/` に wav とタイムラインを出す |
+| `video/screens.tsv` | 行ごとのセクション名と、台本の「画面」欄 |
+| `video/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど） |
+| `video/make_mouths.py` | 公式イラストから口パク用の差分（閉じ・半開き・開き）を作る |
+| `video/make_bgm.py` | BGM をプログラムで合成する |
+| `video/render.py` | 動画 `video/out/video.mp4` と概要欄 `video/out/description.txt` を作る |
+| `assets/slides/` | 構成図とスクリーンショット |
+| `assets/fetch_official.sh` | 公式イラストを zunko.jp から取ってくる |
+| `demo/models.ini` | 撮影に使ったプリセット（記事と同じ設定） |
+
+## 必要なもの
+
+- Python 3（Pillow、numpy）
+- ffmpeg
+- VOICEVOX ENGINE（既定は `http://localhost:50021`。`VOICEVOX_URL` で変えられる）
+- フォント：Noto Sans CJK JP、Cica（パスは `video/render.py` の先頭）
+
+## 作り方
+
+```sh
+sh assets/fetch_official.sh      # 公式イラストを取得
+python3 video/make_mouths.py     # 口パク用の差分を作る
+python3 video/make_bgm.py        # BGM を合成
+python3 voice/synth.py           # 音声を合成（--kana all で読みの確認）
+python3 video/render.py          # 動画と概要欄を作る
+```
+
+確認用に、`video/render.py --preview 30`（先頭 30 秒）、`--still 64`（64 行目の 1 コマ）、`--description`（概要欄だけ）が使えます。
+
+## ライセンスと利用条件
+
+このリポジトリのコード、台本、演出データ、構成図は MIT License です（`LICENSE`）。
+
+次のものは、それぞれの規約に従ってください。
+
+- 音声：VOICEVOX で合成した四国めたん・ずんだもんの音声は、[VOICEVOX 利用規約](https://voicevox.hiroshiba.jp/term/)と[音源利用規約](https://zunko.jp/con_ongen_kiyaku.html)に従います。公開時はクレジット表記「VOICEVOX:四国めたん」「VOICEVOX:ずんだもん」が必要です。
+- イラスト：四国めたん・ずんだもんのイラストは[東北ずん子・ずんだもんプロジェクト](https://zunko.jp/)の公式素材です。[キャラクター利用ガイドライン](https://zunko.jp/guideline.html)に従ってください。再配布を避けるため、画像そのものと口パク差分はリポジトリに含めていません。
+- スクリーンショット：`assets/slides/hf-*.png` は Hugging Face の画面です。
+- BGM：`video/make_bgm.py` で合成したオリジナルです（MIT License）。

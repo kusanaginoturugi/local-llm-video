@@ -1,0 +1,217 @@
+"""台本の行番号ごとに出す画面。指定のない行は直前の画面を引き継ぐ。
+
+種類:
+  title(大見出し, 小見出し)
+  image(ファイル名)            assets/slides/ の画像
+  term(行のリスト, hl=強調する行番号)   ターミナル風
+  code(見出し, 行のリスト, hl=...)     設定ファイルなど
+  table(見出し, ヘッダー, 行, hl=...)
+  bullets(見出し, 項目)
+  big(文字)                     大きな一文
+  todo(説明)                    まだ録っていない画面の仮置き
+"""
+
+
+def title(main, sub=""):
+    return ("title", main, sub)
+
+
+def image(name):
+    return ("image", name)
+
+
+def term(lines, hl=()):
+    return ("term", lines, set(hl))
+
+
+def code(head, lines, hl=()):
+    return ("code", head, lines, set(hl))
+
+
+def table(head, header, rows, hl=()):
+    return ("table", head, header, rows, set(hl))
+
+
+def bullets(head, items):
+    return ("bullets", head, items)
+
+
+def big(text):
+    return ("big", text)
+
+
+def todo(text):
+    return ("todo", text)
+
+
+PREPARE = ("準備するもの", ["項目", "目安", "撮影環境"], [
+    ["OS", "Linux / macOS / Windows", "Arch 系 Linux"],
+    ["GPU", "NVIDIA / AMD / Intel / Apple（なくても可）", "RTX 4070"],
+    ["VRAM", "モデル本体＋コンテキスト分", "12GB"],
+    ["ディスク", "モデル1本 3〜6GB", "—"],
+])
+INSTALL = ("llama.cpp の入れ方", ["方法", "例"], [
+    ["パッケージ", "brew / winget / pacman"],
+    ["配布ファイル", "GitHub Releases の zip"],
+    ["ソースからビルド", "cmake -DGGML_CUDA=ON"],
+])
+MODELS = ("今回使う 2 本", ["モデル", "指定", "サイズ"], [
+    ["Gemma 4 E4B", "unsloth/gemma-4-E4B-it-GGUF:Q4_K_M", "約 5.0GB"],
+    ["Qwen3 4B", "Qwen/Qwen3-4B-GGUF:Q4_K_M", "約 2.4GB"],
+])
+KV = ("KV キャッシュの大きさ（Qwen3-4B）", ["ctx-size", "KV キャッシュ"], [
+    ["8,192", "約 1.1GB"],
+    ["32,768", "4.5GB（実測）"],
+])
+DEFAULT = ("設定なしで起動したとき（実測）", ["読み込んだ順", "モデル", "ctx", "VRAM（GPU 全体）"], [
+    ["1 本目", "gemma-4-E4B", "131,072", "9.3GB"],
+    ["2 本目", "Qwen3-4B", "4,096", "10.9GB"],
+])
+PRESET_RESULT = ("プリセットで決めた結果", ["モデル", "ctx", "設定なしのとき"], [
+    ["gemma-4-e4b", "32,768", "131,072"],
+    ["qwen3-4b", "8,192", "4,096"],
+])
+SWITCH = ("モデルを切り替えたあとの応答時間", ["設定", "応答時間", "何が起きているか"], [
+    ["--models-max 1", "毎回 1.4〜2.2 秒", "降ろして読み込み直す"],
+    ["--models-max 2", "0.06〜0.65 秒", "2 本とも載ったまま"],
+])
+MODELS_INI = [
+    "; ~/.config/llama.cpp/models.ini",
+    "version = 1",
+    "",
+    "[*]",
+    "n-gpu-layers = all",
+    "parallel = 1",
+    "",
+    "[gemma-4-e4b]",
+    "hf = unsloth/gemma-4-E4B-it-GGUF:Q4_K_M",
+    "ctx-size = 32768",
+    "",
+    "[qwen3-4b]",
+    "hf = Qwen/Qwen3-4B-GGUF:Q4_K_M",
+    "ctx-size = 8192",
+]
+SERVICE = [
+    "[Unit]",
+    "Description=llama.cpp server (router)",
+    "",
+    "[Service]",
+    "ExecStart=/usr/bin/llama-server \\",
+    "  --host 127.0.0.1 --port 8080 \\",
+    "  --models-preset %h/.config/llama.cpp/models.ini \\",
+    "  --models-max 2",
+    "Restart=on-failure",
+    "RestartSec=3",
+    "",
+    "[Install]",
+    "WantedBy=default.target",
+]
+CURL = [
+    "$ curl http://127.0.0.1:8080/v1/chat/completions \\",
+    "    -H 'Content-Type: application/json' \\",
+    "    -d '{",
+    '      "model": "gemma-4-e4b",',
+    '      "messages": [{"role": "user", "content": "こんにちは"}]',
+    "    }'",
+]
+FIT = [
+    "$ llama-fit-params -hf Qwen/Qwen3-4B-GGUF:Q4_K_M -c 32768 -lv 4",
+    "| memory breakdown [MiB] | total  free   self   model  context  compute |",
+    "|   - CUDA0 (RTX 4070)   | 11952 = 685 + (7332 = 2375 + 4608 + 348) ... |",
+    "projected to use 7332 MiB of device memory vs. 685 MiB of free device memory",
+]
+
+SLIDES = {
+    1: title("ローカル LLM で遊ぼう", "第1弾　llama-server を立ち上げよう"),
+    5: bullets("ローカル LLM でできること", ["使い放題、データが外に出ない", "自分のアプリから API で呼べる", "翻訳・要約・読み上げ…"]),
+    7: image("diagram.png"),
+    13: table(*PREPARE),
+    14: table(*PREPARE, hl=[2]),
+    16: table(*INSTALL),
+    17: term(["$ sudo pacman -S llama-cpp ggml-cuda"]),
+    19: term(["$ llama-server --list-devices", "Available devices:",
+              "  CUDA0: NVIDIA GeForce RTX 4070 (11952 MiB, 9100 MiB free)"]),
+    20: term(["$ llama-server --list-devices", "Available devices:",
+              "  CUDA0: NVIDIA GeForce RTX 4070 (11952 MiB, 9100 MiB free)"], hl=[2]),
+    23: image("hf-search.png"),
+    27: image("hf-model-page.png"),
+    30: image("hf-use-llamacpp.png"),
+    33: table(*MODELS),
+    34: term(["$ llama-cli -hf Qwen/Qwen3-4B-GGUF:Q4_K_M \\", "    -p '日本語で短く自己紹介して。'"]),
+    35: todo("llama-cli の応答が出たところ"),
+    36: term(["$ llama-cli -hf unsloth/gemma-4-E4B-it-GGUF:Q4_K_M \\", "    -p '日本語で短く自己紹介して。'"]),
+    37: term(["$ llama-server -cl", "number of models in cache: 2",
+              "   1. unsloth/gemma-4-E4B-it-GGUF:Q4_K_M", "   2. Qwen/Qwen3-4B-GGUF:Q4_K_M"]),
+    38: title("コンテキスト長", "モデルが一度に扱えるトークン数"),
+    40: bullets("コンテキスト長の枠に入るもの", ["これまでの会話", "今回の入力", "これから書く返事"]),
+    42: big("約 9,600 文字 → 7,815 トークン（実測）"),
+    44: bullets("枠のぶんだけ VRAM を先に取る", ["会話を覚えておく作業場＝KV キャッシュ", "枠が長いほど大きくなる"]),
+    45: table(*KV),
+    47: image("webui-gauge.png"),
+    50: term(["$ llama-server", "main: router mode, no model specified"]),
+    51: image("webui-models.png"),
+    53: image("webui-chat-gemma.png"),
+    54: table(*DEFAULT, hl=[0]),
+    55: table(*DEFAULT, hl=[1]),
+    57: table(*DEFAULT),
+    59: todo("Qwen に約 9,600 文字の要約を頼む"),
+    60: term(['{"error":{"code":400,', '  "message":"request (7815 tokens) exceeds the available',
+              '             context size (4096 tokens), try increasing it",',
+              '  "type":"exceed_context_size_error"}}'], hl=[3]),
+    63: big("12GB の VRAM を、モデルごとに配分する"),
+    64: code("models.ini（プリセット）", MODELS_INI),
+    65: code("models.ini（プリセット）", MODELS_INI, hl=[7, 11]),
+    67: code("models.ini（プリセット）", MODELS_INI, hl=[4]),
+    69: term(["$ llama-server --models-preset ~/.config/llama.cpp/models.ini \\", "    --models-max 2"]),
+    70: table(*PRESET_RESULT),
+    71: todo("さっきの長文を送り直して、要約が返ってくる"),
+    74: table(*SWITCH),
+    75: image("webui-chat-qwen.png"),
+    76: table(*SWITCH, hl=[1]),
+    79: image("diagram.png"),
+    80: image("webui-chat-gemma.png"),
+    81: image("webui-chat-qwen.png"),
+    82: image("webui-gauge-info.png"),
+    83: term(CURL, hl=[3]),
+    84: term([l.replace("gemma-4-e4b", "qwen3-4b") for l in CURL], hl=[3]),
+    85: todo("nvtop（全画面）"),
+    86: bullets("nvtop で見るところ", ["VRAM の使用量", "GPU の使用率", "プロセス一覧（モデルごとに 1 行）"]),
+    91: big("VRAM が足りなくなったら？"),
+    89: todo("返事を書いている間の GPU 使用率のグラフ"),
+    93: title("メモリ不足（OOM）", "わざと起こしてみる"),
+    94: big("OOM = ？"),
+    95: bullets("OOM = Out Of Memory（メモリ不足）", ["モデル本体 ＋ KV キャッシュ ＞ 空いている VRAM", "そのモデルは起動できない"]),
+    96: big("お弁当箱に詰めすぎて、ふたが閉まらない"),
+    98: code("models.ini（プリセット）", MODELS_INI[:-1] + ["ctx-size = 32768"], hl=[13]),
+    99: image("webui-oom-error.png"),
+    100: term(["E ggml_backend_cuda_buffer_type_alloc_buffer: allocating 4608.00 MiB",
+              "  on device 0: cudaMalloc failed: out of memory",
+              "E llama_init_from_model: failed to initialize the context:",
+              "  failed to allocate buffer for kv cache"]),
+    101: term(["E ggml_backend_cuda_buffer_type_alloc_buffer: allocating 4608.00 MiB",
+              "  on device 0: cudaMalloc failed: out of memory",
+              "E llama_init_from_model: failed to initialize the context:",
+              "  failed to allocate buffer for kv cache"], hl=[3]),
+    103: todo("gemma は普通に返事をする（ルーターは生きている）"),
+    105: term(FIT),
+    106: term(FIT, hl=[2]),
+    108: term(["$ llama-fit-params -hf Qwen/Qwen3-4B-GGUF:Q4_K_M -c 8192 -lv 4",
+               "projected to use 3852 MiB of device memory ..."], hl=[1]),
+    109: term(["E llama_model_load: error loading model:", "  unable to allocate CUDA0 buffer"], hl=[1]),
+    110: big("ctx-size を 8,192 に戻して、仕上げへ"),
+    112: code("~/.config/systemd/user/llama-server.service", SERVICE),
+    113: code("~/.config/systemd/user/llama-server.service", SERVICE, hl=[4, 8]),
+    114: bullets("ことわり書き", ["パッケージに systemd の設定が付いてくることもある",
+                                  "中身は環境ごとに違う",
+                                  "今回は自分で置いた設定を使う（~/.config が優先される）"]),
+    115: term(["$ systemctl --user daemon-reload", "$ systemctl --user enable --now llama-server.service"]),
+    116: term(["$ loginctl enable-linger $USER"]),
+    117: term(["$ systemctl --user status llama-server.service", "$ journalctl --user -u llama-server -f"]),
+    118: image("diagram.png"),
+    119: bullets("まとめ", ["モデルは Hugging Face から -hf で", "コンテキスト長は VRAM を食う",
+                            "プリセットでモデルごとに決める", "小さいモデル 2 本常駐で切り替えは一瞬",
+                            "足りなそうなら llama-fit-params で見積もる", "systemd で常駐"]),
+    122: bullets("次回予告", ["このサーバーを使って、自分のアプリを作る"]),
+    124: title("ご視聴ありがとうございました",
+               "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん　イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成"),
+}
