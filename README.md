@@ -3,7 +3,8 @@
 YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作るためのリポジトリです。
 台本から VOICEVOX で音声を合成し、口パクつきの解説動画と概要欄の文面までを生成します。
 
-- 第1弾：llama-server を立ち上げよう
+- 第1弾：llama-server を立ち上げよう（2026-10-18 公開）
+  - 動画: https://youtu.be/3Sk9T1VqNsg
   - 記事: https://claude.ai/code/artifact/2be896e8-2ab9-4dd7-bf05-cff1beb45e71
   - 台本: https://claude.ai/code/artifact/45ace86b-536a-4dd5-a09a-cb9db2f17fa1
 
