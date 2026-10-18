@@ -35,6 +35,7 @@ MUTED = (150, 156, 172)
 HL = (255, 214, 102)
 COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70)}
 SLUG = {"めたん": "metan", "ずんだもん": "zundamon"}
+FADE = 0.4  # 章の変わり目で、見出しの前後をフェードでつなぐ秒数
 ANNOTATE_ONCE = True  # False にすると、用語が出るたびに毎回読みを添える
 BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔王魂「アコースティック51」ループ版
 BG_IMAGE = os.environ.get("BG_IMAGE", os.path.join(ROOT, "assets", "bg", "rgb_desk.jpg"))  # 背景（ぼかして暗くする）。空なら単色
@@ -536,9 +537,20 @@ def main():
                 and nxt["start"] - lines[li]["end"] >= 1.0):
             if card_for != nxt["section"]:
                 card, card_for = section_card(nxt["section"]), nxt["section"]
-            key = ("card", card_for)
+                next_base = base_frame(nxt)
+            # 前の章の画面 → 見出し → 次の章の画面を、FADE 秒ずつフェードでつなぐ
+            c0, c1 = lines[li]["end"] + 0.2, nxt["start"]
+            if t < c0 + FADE:
+                a = round((t - c0) / FADE, 2)
+                bg = Image.blend(base, card, a)
+            elif t > c1 - FADE:
+                a = round((c1 - t) / FADE, 2)
+                bg = Image.blend(next_base, card, max(0.0, a))
+            else:
+                a, bg = 1.0, card
+            key = ("card", card_for, a, t > c1 - FADE)
             if key != prev_key:
-                prev_bytes = frame_at(card, lines[li], t, chars, talking=False).tobytes()
+                prev_bytes = frame_at(bg, lines[li], t, chars, talking=False).tobytes()
         else:
             state = speaker_state(lines[li], t)
             key = (li, state)
