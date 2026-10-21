@@ -4,13 +4,14 @@ assets/chars/
 
 # 生成物（スクリプトで作り直せる）
 assets/bgm/
-voice/out/
-video/out/
-voice/kana.txt
-video/renumber.txt
+episodes/*/out/
 
 # テスト用サーバーのモデルキャッシュとログ
-demo/cache/
-demo/*.log
+episodes/*/demo/cache/
+episodes/*/demo/*.log
 
 __pycache__/
+episodes/*/demo/models/
+
+# デモ用に VOICEVOX で作った音声（.txt から作り直せる）
+episodes/*/demo/audio/*.wav

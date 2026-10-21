@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """合成済みの音声と台本から、口パクつきの解説動画と概要欄の文面を作る。
 
-  python3 render.py              # out/video.mp4 と out/description.txt
+  python3 render.py              # out/video/video.mp4 と out/video/description.txt（いちばん新しい回）
+  EPISODE=ep01 python3 render.py # 回を選ぶ
   python3 render.py --preview 30 # 先頭 30 秒だけ作る（確認用）
   python3 render.py --still 64   # 指定行の 1 コマを out/still_064.png に保存
   python3 render.py --description # 概要欄の文面だけ out/description.txt に書き出す
@@ -17,13 +18,16 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
-from slides import SLIDES
-
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VOICE = os.path.join(ROOT, "voice", "out")
+sys.path.insert(0, ROOT)
+import episode  # noqa: E402
+
+SLIDES = episode.module("slides").SLIDES
+META = episode.module("meta")  # 概要欄の文面とリンク
+VOICE = episode.VOICE_OUT
 CHARS = os.path.join(ROOT, "assets", "chars")
-SLIDE_DIR = os.path.join(ROOT, "assets", "slides")
-OUT = os.path.join(ROOT, "video", "out")
+SLIDE_DIR = episode.SLIDE_DIR
+OUT = episode.VIDEO_OUT
 
 W, H, FPS = 1920, 1080, 30
 SIDE = 440                         # 左右のキャラの列の幅（左右で同じ）
@@ -151,6 +155,40 @@ def draw_slide(img, spec, section):
             color = (130, 220, 130) if l.startswith("$") else (HL if i in hl else TEXT)
             d.text((x0 + 40, y), l, font=f, fill=color)
             y += lh
+    elif kind == "flow":
+        # 横に並べた箱を矢印でつなぐ流れ図。箱は (名前, 説明の行…)。hl の箱を強調し、notes を下に並べる
+        _, head, boxes, hl, notes = spec
+        d.text((x0 + 40, y0 + 30), head, font=font(JP_BOLD, 48), fill=TEXT)
+        n, gap = len(boxes), 70
+        bw = (x1 - x0 - 80 - gap * (n - 1)) / n
+        by0, by1 = y0 + 130, y0 + 130 + (300 if notes else 420)
+        fn, fl = font(JP_BOLD, 36), font(JP, 28)
+        for i, (name, *desc) in enumerate(boxes):
+            bx = x0 + 40 + i * (bw + gap)
+            on = i in hl
+            d.rounded_rectangle((bx, by0, bx + bw, by1), 18, fill=(70, 62, 30) if on else (32, 35, 44),
+                                outline=HL if on else MUTED, width=4 if on else 2)
+            cf = fn
+            while cf.getlength(name) > bw - 30 and cf.size > 20:
+                cf = font(JP_BOLD, cf.size - 2)
+            d.text((bx + bw / 2, by0 + 60), name, font=cf, fill=HL if on else TEXT, anchor="mm")
+            for j, l in enumerate(desc):
+                lf = fl
+                while lf.getlength(l) > bw - 30 and lf.size > 18:
+                    lf = font(JP, lf.size - 2)
+                d.text((bx + bw / 2, by0 + 130 + j * 46), l, font=lf, fill=TEXT if j == 0 else MUTED, anchor="mm")
+            if i < n - 1:
+                ax, ay = bx + bw + 10, (by0 + by1) / 2
+                d.line((ax, ay, ax + gap - 20, ay), fill=MUTED, width=5)
+                d.polygon([(ax + gap - 20, ay - 14), (ax + gap - 4, ay), (ax + gap - 20, ay + 14)], fill=MUTED)
+        y = by1 + 50
+        for label, text, strong in notes:
+            d.text((x0 + 60, y), label, font=font(JP_BOLD, 30), fill=HL if strong else MUTED)
+            tf = font(JP_BOLD if strong else JP, 34)
+            while tf.getlength(text) > x1 - x0 - 340 and tf.size > 18:
+                tf = font(JP_BOLD if strong else JP, tf.size - 2)
+            d.text((x0 + 280, y - 2), text, font=tf, fill=TEXT)
+            y += 70
     elif kind == "table":
         _, head, header, rows, hl = spec
         d.text((x0 + 40, y0 + 40), head, font=font(JP_BOLD, 52), fill=TEXT)
@@ -160,7 +198,9 @@ def draw_slide(img, spec, section):
         scale = min(1.0, (x1 - x0 - 80) / sum(widths))
         widths = [w * scale for w in widths]
         y = y0 + 150
-        rh = 80
+        rh = min(80, int((y1 - y0 - 250) / (len(rows) + 1)))  # 行が多い表は詰めて、下の角のキャラにかぶらないようにする
+        if rh < 80:
+            f, fb = font(JP, int(36 * rh / 80) + 4), font(JP_BOLD, int(36 * rh / 80) + 4)
         tx = x0 + (x1 - x0 - sum(widths)) / 2  # 表は画面の中央に置く
         for ri, row in enumerate([header] + rows):
             x = tx
@@ -177,10 +217,10 @@ def draw_slide(img, spec, section):
 
 
 def load_annotations():
-    """dict_common.tsv と dict_episode.tsv で annotate=yes の用語 → 読み。"""
+    """dict_common.tsv とその回の dict.tsv で annotate=yes の用語 → 読み。"""
     out = {}
-    for name in ("dict_common.tsv", "dict_episode.tsv"):
-        with open(os.path.join(ROOT, "voice", name), newline="") as f:
+    for name in (os.path.join(ROOT, "voice", "dict_common.tsv"), episode.path("dict.tsv")):
+        with open(name, newline="") as f:
             out.update({r["surface"]: r["reading"] for r in csv.DictReader(f, delimiter="\t")
                         if r.get("annotate") == "yes"})
     return out
@@ -282,9 +322,9 @@ def motion_offset(kind, dt):
 def load_lines():
     with open(os.path.join(VOICE, "timeline.tsv"), newline="") as f:
         tl = list(csv.DictReader(f, delimiter="\t"))
-    with open(os.path.join(ROOT, "video", "screens.tsv"), newline="") as f:
+    with open(episode.path("screens.tsv"), newline="") as f:
         sections = {r["no"]: r["section"] for r in csv.DictReader(f, delimiter="\t")}
-    with open(os.path.join(ROOT, "voice", "direction.tsv"), newline="") as f:
+    with open(episode.path("direction.tsv"), newline="") as f:
         reacts = {r["no"]: r.get("react", "") for r in csv.DictReader(f, delimiter="\t")}
     lines, spec = [], SLIDES[1]
     for r in tl:
@@ -423,11 +463,6 @@ def sd_image(name):
     return _sd[name]
 
 
-REPO = "https://github.com/kusanaginoturugi/local-llm-video"
-ARTICLE = "https://claude.ai/code/artifact/2be896e8-2ab9-4dd7-bf05-cff1beb45e71"
-SCRIPT_DOC = "https://claude.ai/code/artifact/45ace86b-536a-4dd5-a09a-cb9db2f17fa1"
-
-
 def write_description(lines):
     chapters, seen, prev = [], set(), None
     for ln in lines:
@@ -439,54 +474,7 @@ def write_description(lines):
             title = sec.split(". ", 1)[-1]
             chapters.append(f"{t // 60}:{t % 60:02d} {title}")
         prev = ln
-    text = "\n".join([
-        "自分のパソコンで LLM（大規模言語モデル）のサーバーを立ち上げる、「ローカル LLM で遊ぼう」シリーズの第1弾です。",
-        "llama.cpp の llama-server を使い、Hugging Face から落とした 2 つのモデルを 1 つのサーバーで切り替えて使えるようにして、",
-        "systemd で常駐させるところまでを、四国めたんとずんだもんの掛け合いで解説します。",
-        "",
-        "■ この動画で分かること",
-        "・llama.cpp の入手と、Hugging Face でのモデルの探し方",
-        "・コンテキスト長と VRAM の関係（設定なしで起動すると何が起きるか）",
-        "・ルーターモードとプリセット（models.ini）で、モデルごとに設定する方法",
-        "・小さなモデルを 2 つ常駐させて、切り替えを一瞬にする方法",
-        "・OOM（メモリ不足）の見分け方と、llama-fit-params での見積もり",
-        "・systemd で常駐させる方法",
-        "",
-        "■ 撮影環境",
-        "Arch 系 Linux / NVIDIA GeForce RTX 4070（VRAM 12GB）/ llama.cpp build 11429",
-        "モデル: Gemma 4 E4B（Q4_K_M）、Qwen3 4B（Q4_K_M）",
-        "",
-        "■ 目次",
-        *chapters,
-        "",
-        "■ 元になった記事と台本",
-        f"記事: {ARTICLE}",
-        f"台本: {SCRIPT_DOC}",
-        "",
-        "■ ソースコード（台本・音声合成・動画生成）",
-        REPO,
-        "",
-        "■ 制作",
-        "台本・記事・検証・動画の組み立て: Claude Code",
-        "Hugging Face と Web UI の画面の撮影: Claude in Chrome",
-        "",
-        "■ クレジット",
-        "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん",
-        "イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成",
-        "BGM: 魔王魂「アコースティック51」 https://maou.audio/bgm_acoustic51/ （CC BY 4.0）",
-        "背景写真: SankalpSasnur「RGB desktop computer setup with keyboard and monitor」（CC0）",
-        "https://commons.wikimedia.org/wiki/File:RGB_desktop_computer_setup_with_keyboard_and_monitor.jpg",
-        "",
-        "■ 謝辞",
-        "オープンソースでツールを作ってくれた皆様方。",
-        "素晴らしい楽曲をクリエイティブ・コモンズで公開してくれている作曲者様。",
-        "可愛い絵柄のずんだもんたちを描いてくれた絵師さん。",
-        "素敵な音声合成を作っていただいた皆様。",
-        "生成 AI という、とてつもなく全く新しく面白くて強力なアシスタントを作ってくれた方々。",
-        "そして、動画作成のきっかけを与えてくれた友達。ありがとうございます。",
-        "",
-        "#ローカルLLM #llamacpp #ずんだもん #四国めたん #VOICEVOX",
-    ])
+    text = META.description(chapters)
     with open(os.path.join(OUT, "description.txt"), "w") as f:
         f.write(text + "\n")
     return text

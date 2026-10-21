@@ -2,6 +2,7 @@
 """台本 (script.tsv) を VOICEVOX で一括合成する。
 
   python3 synth.py              # 未合成の行だけ合成し、all.wav と timeline.tsv を作り直す
+  EPISODE=ep01 python3 synth.py # 回を選ぶ（指定がなければいちばん新しい回）
   python3 synth.py --force      # 全行を合成し直す
   python3 synth.py --only 22,92 # 指定した行だけ合成し直す
   python3 synth.py --kana       # 合成せず、英字を含む行の読み（カナ）を表示する
@@ -9,10 +10,13 @@
 
 読みの置き換えは 3 段で行う（VOICEVOX のユーザー辞書は変更しない）。
   1. direction.tsv の yomi 列: その行だけの読み（例: 九割五分=きゅうわりごぶ;黄色=きいろ）
-  2. dict_episode.tsv: この動画だけで使う語
-  3. dict_common.tsv: シリーズ共通の技術用語
+  2. その回の dict.tsv: この動画だけで使う語
+  3. voice/dict_common.tsv: シリーズ共通の技術用語
+台本・演出・その回の辞書は episodes/epNN/ に置き、出力は episodes/epNN/out/voice/ に書く。
 英字の語は単語の区切りでだけ置き換える（ini が Gemini に当たらないように）。
 行ごとの演出（スタイル・抑揚・前の間・動き）は direction.tsv で指定する。
+辞書ではどうしても区切りやアクセントが直らない行は、direction.tsv の kana 列に読みを AquesTalk 風の
+カナ（--kana の表示と同じ記法。' がアクセント、/ が区切り、_ が無声化）で書くと、その行だけ置き換える。
 """
 import argparse
 import array
@@ -27,6 +31,8 @@ import urllib.request
 import wave
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(HERE))
+import episode  # noqa: E402
 ENGINE = os.environ.get("VOICEVOX_URL", "http://localhost:50021")
 
 # 話者ごとの設定。id は VOICEVOX のスタイル ID、pan は左右の位置（-1 左 〜 0 中央 〜 1 右）
@@ -37,8 +43,8 @@ SPEAKERS = {
 GAP_SEC = 0.35  # all.wav で行と行の間に入れる無音（direction.tsv の gap で上書き）
 
 
-def load_tsv(name):
-    with open(os.path.join(HERE, name), newline="") as f:
+def load_tsv(path):
+    with open(path, newline="") as f:
         return list(csv.DictReader(f, delimiter="\t"))
 
 
@@ -58,8 +64,8 @@ def line_words(yomi):
     return [tuple(p.split("=", 1)) for p in (yomi or "").split(";") if "=" in p]
 
 
-def apply_dict(text, yomi, episode, common):
-    for words in (line_words(yomi), episode, common):
+def apply_dict(text, yomi, episode_words, common):
+    for words in (line_words(yomi), episode_words, common):
         text = replace_words(text, words)
     # 日本語と英数字の間の半角スペースは読み上げで間が空くので取り除く
     return re.sub(r"(?<=[^\x00-\x7f]) +| +(?=[^\x00-\x7f])", "", text)
@@ -97,8 +103,12 @@ def voice_for(r, direction, styles):
     return spk
 
 
-def make_query(text, spk):
+def make_query(text, spk, kana=None):
     q = json.loads(post("/audio_query", {"speaker": spk["id"], "text": text}))
+    if kana:
+        # direction.tsv の kana 列（AquesTalk 風の記法）で、読みと区切りとアクセントを丸ごと置き換える
+        q["accent_phrases"] = json.loads(post("/accent_phrases", {"speaker": spk["id"], "text": kana, "is_kana": "true"}))
+        q["kana"] = kana
     q["speedScale"] = spk["speedScale"]
     if "intonationScale" in spk:
         q["intonationScale"] = spk["intonationScale"]
@@ -129,20 +139,20 @@ def main():
                     help="合成せず読みを表示する（all で全行、省略時は英字を含む行だけ）")
     args = ap.parse_args()
 
-    rows = load_tsv("script.tsv")
-    episode = [(w["surface"], w["reading"]) for w in load_tsv("dict_episode.tsv")]
-    common = [(w["surface"], w["reading"]) for w in load_tsv("dict_common.tsv")]
-    direction = {d["no"]: d for d in load_tsv("direction.tsv")}
+    rows = load_tsv(episode.path("script.tsv"))
+    words = [(w["surface"], w["reading"]) for w in load_tsv(episode.path("dict.tsv"))]
+    common = [(w["surface"], w["reading"]) for w in load_tsv(os.path.join(HERE, "dict_common.tsv"))]
+    direction = {d["no"]: d for d in load_tsv(episode.path("direction.tsv"))}
     styles = style_ids()
     only = {int(n) for n in args.only.split(",")} if args.only else None
-    out_dir = os.path.join(HERE, "out")
+    out_dir = episode.VOICE_OUT
     os.makedirs(out_dir, exist_ok=True)
 
     if args.kana:
         for r in rows:
             if args.kana == "all" or any(c.isascii() and c.isalpha() for c in r["text"]):
-                q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), episode, common),
-                               voice_for(r, direction, styles))
+                q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), words, common),
+                               voice_for(r, direction, styles), direction.get(r["no"], {}).get("kana"))
                 print(f"{r['no']:>3} {r['text']}\n    {q['kana']}")
         return
 
@@ -154,7 +164,8 @@ def main():
         if only is None and not args.force and os.path.exists(base + ".wav"):
             continue
         spk = voice_for(r, direction, styles)
-        q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), episode, common), spk)
+        q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), words, common), spk,
+                       direction.get(r["no"], {}).get("kana"))
         with open(base + ".wav", "wb") as f:
             f.write(post("/synthesis", {"speaker": spk["id"]}, q))
         # 口パク用に、モーラごとの長さを含むクエリも残す

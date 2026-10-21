@@ -1,48 +1,5 @@
-"""台本の行番号ごとに出す画面。指定のない行は直前の画面を引き継ぐ。
-
-種類:
-  title(大見出し, 小見出し)
-  image(ファイル名)            assets/slides/ の画像
-  term(行のリスト, hl=強調する行番号)   ターミナル風
-  code(見出し, 行のリスト, hl=...)     設定ファイルなど
-  table(見出し, ヘッダー, 行, hl=...)
-  bullets(見出し, 項目)
-  big(文字)                     大きな一文
-  todo(説明)                    まだ録っていない画面の仮置き
-"""
-
-
-def title(main, sub=""):
-    return ("title", main, sub)
-
-
-def image(name):
-    return ("image", name)
-
-
-def term(lines, hl=()):
-    return ("term", lines, set(hl))
-
-
-def code(head, lines, hl=()):
-    return ("code", head, lines, set(hl))
-
-
-def table(head, header, rows, hl=()):
-    return ("table", head, header, rows, set(hl))
-
-
-def bullets(head, items):
-    return ("bullets", head, items)
-
-
-def big(text):
-    return ("big", text)
-
-
-def todo(text):
-    return ("todo", text)
-
+"""第1弾の画面。台本の行番号ごとに出す画面で、指定のない行は直前の画面を引き継ぐ。"""
+from slidekit import big, bullets, code, image, table, term, title  # noqa: F401
 
 PREPARE = ("準備するもの", ["項目", "目安", "撮影環境"], [
     ["OS", "Linux / macOS / Windows", "Arch 系 Linux"],

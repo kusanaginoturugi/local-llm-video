@@ -1,0 +1,125 @@
+no	section	speaker	screen
+1	1. オープニングと完成形	めたん	タイトル
+2	1. オープニングと完成形	ずんだもん	
+3	1. オープニングと完成形	めたん	第1弾の完成形の図
+4	1. オープニングと完成形	ずんだもん	
+5	1. オープニングと完成形	めたん	
+6	1. オープニングと完成形	めたん	デモ録画：エディタに向かって voice-input。「えっと、あの、明日の会議なんですけど…」の音声を流す
+7	1. オープニングと完成形	ずんだもん	入力された文「明日の会議は水曜日の10時からで、場所は第2会議室です。」を強調
+8	1. オープニングと完成形	ずんだもん	
+9	1. オープニングと完成形	めたん	完成形の図
+10	1. オープニングと完成形	めたん	図の「約 0.2 秒」「約 0.4 秒」を強調
+11	1. オープニングと完成形	ずんだもん	
+12	1. オープニングと完成形	めたん	
+13	2. なぜ自分のパソコンでやるのか	ずんだもん	見出し「なぜ自分のパソコンで」
+14	2. なぜ自分のパソコンでやるのか	めたん	「声 → クラウド → 文字」と「声 → 自分の PC → 文字」の対比
+15	2. なぜ自分のパソコンでやるのか	めたん	「外に出したくない話」の例を並べる
+16	2. なぜ自分のパソコンでやるのか	ずんだもん	
+17	2. なぜ自分のパソコンでやるのか	めたん	
+18	2. なぜ自分のパソコンでやるのか	めたん	
+19	2. なぜ自分のパソコンでやるのか	ずんだもん	
+20	2. なぜ自分のパソコンでやるのか	めたん	メリットの一覧（無料・ネット不要・速い・自分で変えられる）
+21	2. なぜ自分のパソコンでやるのか	ずんだもん	
+22	2. なぜ自分のパソコンでやるのか	めたん	「声を文字にして整えるところまで」を強調
+23	3. whisper.cpp とモデル選び	ずんだもん	見出し「whisper.cpp」
+24	3. whisper.cpp とモデル選び	めたん	llama.cpp と whisper.cpp の対比表
+25	3. whisper.cpp とモデル選び	めたん	表の cli と server の行を強調
+26	3. whisper.cpp とモデル選び	ずんだもん	
+27	3. whisper.cpp とモデル選び	めたん	ターミナル: sudo pacman -S whisper-cpp
+28	3. whisper.cpp とモデル選び	めたん	ブラウザ: huggingface.co/ggerganov/whisper.cpp
+29	3. whisper.cpp とモデル選び	ずんだもん	ファイル一覧のスクショ
+30	3. whisper.cpp とモデル選び	めたん	モデル比較の表
+31	3. whisper.cpp とモデル選び	めたん	small の行を強調
+32	3. whisper.cpp とモデル選び	ずんだもん	
+33	3. whisper.cpp とモデル選び	めたん	turbo の行を強調
+34	3. whisper.cpp とモデル選び	ずんだもん	
+35	3. whisper.cpp とモデル選び	めたん	medium と medium-q5_0 の行を強調
+36	3. whisper.cpp とモデル選び	めたん	「迷ったら medium-q5_0」
+37	3. whisper.cpp とモデル選び	ずんだもん	
+38	4. whisper-cli と whisper-server	めたん	見出し「whisper-cli」、ターミナル: ffmpeg -i input.m4a -ar 16000 -ac 1 sample.wav
+39	4. whisper-cli と whisper-server	めたん	ターミナル: whisper-cli -m ggml-medium.bin -f sample.wav -l ja -nt
+40	4. whisper-cli と whisper-server	めたん	デモ音声を流す
+41	4. whisper-cli と whisper-server	ずんだもん	出力を強調
+42	4. whisper-cli と whisper-server	めたん	
+43	4. whisper-cli と whisper-server	ずんだもん	
+44	4. whisper-cli と whisper-server	めたん	
+45	4. whisper-cli と whisper-server	めたん	ターミナル: whisper-server -m ggml-medium.bin -l ja -nt --host 127.0.0.1 --port 8082
+46	4. whisper-cli と whisper-server	めたん	ターミナル: curl …/inference -F file=@sample.wav
+47	4. whisper-cli と whisper-server	ずんだもん	応答が出たところ
+48	4. whisper-cli と whisper-server	めたん	whisper-server.service の中身
+49	4. whisper-cli と whisper-server	ずんだもん	
+50	5. 清書と thinking	めたん	見出し「清書」
+51	5. 清書と thinking	めたん	指示の要点 3 つ
+52	5. 清書と thinking	ずんだもん	
+53	5. 清書と thinking	めたん	
+54	5. 清書と thinking	めたん	curl の問い合わせ全体
+55	5. 清書と thinking	めたん	response_format を強調
+56	5. 清書と thinking	ずんだもん	
+57	5. 清書と thinking	めたん	清書の前と後を並べる
+58	5. 清書と thinking	ずんだもん	
+59	5. 清書と thinking	めたん	chat_template_kwargs の行を強調
+60	5. 清書と thinking	めたん	
+61	5. 清書と thinking	ずんだもん	
+62	5. 清書と thinking	めたん	thinking あり・なしの表
+63	5. 清書と thinking	ずんだもん	
+64	5. 清書と thinking	めたん	
+65	5. 清書と thinking	ずんだもん	
+66	5. 清書と thinking	めたん	「どこで切るか」の表
+67	5. 清書と thinking	めたん	
+68	6. 音声入力スクリプト voice-input	めたん	見出し「voice-input」、スクリプト全体をスクロール
+69	6. 音声入力スクリプト voice-input	ずんだもん	
+70	6. 音声入力スクリプト voice-input	めたん	「92 行」を大きく
+71	6. 音声入力スクリプト voice-input	めたん	流れの表（録音 → 文字 → 清書 → 入力）
+72	6. 音声入力スクリプト voice-input	ずんだもん	
+73	6. 音声入力スクリプト voice-input	めたん	
+74	6. 音声入力スクリプト voice-input	めたん	
+75	6. 音声入力スクリプト voice-input	めたん	「改行は入れられません」を大きく
+76	6. 音声入力スクリプト voice-input	ずんだもん	
+77	6. 音声入力スクリプト voice-input	めたん	
+78	6. 音声入力スクリプト voice-input	めたん	Enter の扱いの表
+79	6. 音声入力スクリプト voice-input	ずんだもん	「送信」を強調
+80	6. 音声入力スクリプト voice-input	めたん	
+81	6. 音声入力スクリプト voice-input	ずんだもん	
+82	6. 音声入力スクリプト voice-input	めたん	
+83	6. 音声入力スクリプト voice-input	めたん	tr '\r\n' '  ' の行を強調
+84	7. 本家版の工夫	めたん	本家版の工夫の表（1 枚）
+85	7. 本家版の工夫	めたん	Hyprland と fcitx5 の行を強調
+86	7. 本家版の工夫	ずんだもん	
+87	7. 本家版の工夫	めたん	
+88	7. 本家版の工夫	めたん	音量の行を強調
+89	7. 本家版の工夫	ずんだもん	
+90	7. 本家版の工夫	めたん	「拾わない・話しやすい・録音中と分かる」
+91	7. 本家版の工夫	ずんだもん	
+92	7. 本家版の工夫	めたん	CPU と採点の行を強調
+93	8. おまけ：Voxtype	ずんだもん	
+94	8. おまけ：Voxtype	めたん	間を置く
+95	8. おまけ：Voxtype	めたん	ブラウザ: github.com/peteonrails/voxtype
+96	8. おまけ：Voxtype	ずんだもん	
+97	8. おまけ：Voxtype	めたん	
+98	8. おまけ：Voxtype	ずんだもん	
+99	8. おまけ：Voxtype	めたん	比較表を 1 行ずつ出す
+100	8. おまけ：Voxtype	ずんだもん	
+101	8. おまけ：Voxtype	めたん	
+102	8. おまけ：Voxtype	ずんだもん	
+103	8. おまけ：Voxtype	めたん	
+104	8. おまけ：Voxtype	ずんだもん	
+105	8. おまけ：Voxtype	めたん	
+106	8. おまけ：Voxtype	ずんだもん	
+107	8. おまけ：Voxtype	めたん	「スター 0 vs 1,677」を強調
+108	8. おまけ：Voxtype	ずんだもん	
+109	8. おまけ：Voxtype	めたん	
+110	8. おまけ：Voxtype	ずんだもん	「完全に車輪の再発明でした。」
+111	8. おまけ：Voxtype	めたん	「シェル 92 行 vs Rust 約 350 万バイト」
+112	8. おまけ：Voxtype	ずんだもん	
+113	8. おまけ：Voxtype	めたん	
+114	9. まとめと次回予告	めたん	まとめのスライド
+115	9. まとめと次回予告	めたん	
+116	9. まとめと次回予告	ずんだもん	
+117	9. まとめと次回予告	めたん	
+118	9. まとめと次回予告	ずんだもん	
+119	9. まとめと次回予告	めたん	
+120	9. まとめと次回予告	めたん	
+121	9. まとめと次回予告	ずんだもん	
+122	9. まとめと次回予告	めたん	次回予告
+123	9. まとめと次回予告	ずんだもん	
+124	9. まとめと次回予告	めたん	

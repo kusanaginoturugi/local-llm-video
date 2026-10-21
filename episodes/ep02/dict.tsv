@@ -1,0 +1,40 @@
+surface	reading	annotate
+whisper.cpp	ウィスパーシーピーピー	yes
+whisper-cli	ウィスパーシーエルアイ	yes
+whisper-server	ウィスパーサーバー	yes
+voice-input	ボイスインプット	yes
+large-v3-turbo	ラージブイスリーターボ	
+medium-q5_0	ミディアムキューファイブゼロ	
+q5_0	キューファイブゼロ	
+Whisper	ウィスパー	
+small	スモール	
+medium	ミディアム	
+turbo	ターボ	
+ffmpeg	エフエフエムペグ	
+WAV	ワブ	
+16kHz	じゅうろくキロヘルツ	
+-l ja	ハイフンエル、ジェーエー	
+MB	メガバイト	
+curl	カール	
+JSON	ジェイソン	
+system	システム	
+user	ユーザー	
+text	テキスト	
+thinking	シンキング	
+enable_thinking	イネーブルシンキング	
+false	フォルス	
+gemma	ジェマ	
+pw-record	ピーダブリューレコード	
+jq	ジェイキュー	
+wtype	ダブリュータイプ	
+Enter	エンター	
+Hyprland	ハイパーランド	
+SUPER	スーパー	
+fcitx5	ファイティクスファイブ	
+Voxtype	ボックスタイプ	
+AUR	エーユーアール	
+GitHub	ギットハブ	
+Claude Code	クロードコード	
+CLI	シーエルアイ	
+Rust	ラスト	
+systemd	システムディー	

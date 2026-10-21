@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""YouTube のサムネイル（1280x720）を作る。out/thumbnail.png に保存する。"""
+"""YouTube のサムネイル（1280x720）を作る。その回の out/video/thumbnail.png に保存する。
+
+文言と SD 絵はその回の meta.py の THUMBNAIL で決める。
+"""
 import os
+import sys
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "video", "out", "thumbnail.png")
+sys.path.insert(0, ROOT)
+import episode  # noqa: E402
+
+THUMB = episode.module("meta").THUMBNAIL
+OUT = os.path.join(episode.VIDEO_OUT, "thumbnail.png")
 BG_IMAGE = os.path.join(ROOT, "assets", "bg", "rgb_desk.jpg")
 SD = os.path.join(ROOT, "assets", "official", "sd")
 BLACK = "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc"
@@ -46,8 +54,8 @@ def main():
     bg.alpha_composite(shade)
 
     # キャラクター: 左にめたん、右にずんだもん（どちらも喜んでいる表情）
-    metan = sd("met_s214", 470)
-    zun = sd("zunmon_3022", 520)
+    metan = sd(THUMB["metan"], 470)
+    zun = sd(THUMB["zundamon"], 520)
     bg.alpha_composite(metan, (-30, H - metan.height + 40))
     bg.alpha_composite(zun, (W - zun.width + 20, H - zun.height + 30))
 
@@ -55,12 +63,12 @@ def main():
     # 上のシリーズ名と回数
     outlined(d, (W // 2, 70), "ローカル LLM で遊ぼう", font(BOLD, 54), (255, 255, 255), (20, 20, 30), 6)
     d.rounded_rectangle((W // 2 - 90, 112, W // 2 + 90, 160), 12, fill=PINK)
-    d.text((W // 2, 136), "第1弾", font=font(BLACK, 34), fill=(255, 255, 255), anchor="mm")
+    d.text((W // 2, 136), THUMB["badge"], font=font(BLACK, 34), fill=(255, 255, 255), anchor="mm")
     # メインのタイトル（2 行）
-    outlined(d, (W // 2, 270), "llama-server", font(BLACK, 128), YELLOW, (20, 20, 30), 12)
-    outlined(d, (W // 2, 420), "を立ち上げよう！", font(BLACK, 100), (255, 255, 255), (20, 20, 30), 12)
+    outlined(d, (W // 2, 270), THUMB["title"], font(BLACK, 128), YELLOW, (20, 20, 30), 12)
+    outlined(d, (W // 2, 420), THUMB["title2"], font(BLACK, 100), (255, 255, 255), (20, 20, 30), 12)
     # 下の補足
-    outlined(d, (W // 2, 525), "2 モデル常駐・切り替え一瞬・OOM 対策", font(BOLD, 40), GREEN, (20, 20, 30), 6)
+    outlined(d, (W // 2, 525), THUMB["sub"], font(BOLD, 40), GREEN, (20, 20, 30), 6)
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     bg.convert("RGB").save(OUT)
