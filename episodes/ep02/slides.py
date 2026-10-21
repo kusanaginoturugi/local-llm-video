@@ -34,7 +34,7 @@ VS = ("llama.cpp と whisper.cpp", ["", "llama.cpp（第1弾）", "whisper.cpp�
     ["モデルの形式", "GGUF", "ggml（ggml-*.bin）"],
     ["モデルの入手", "-hf で自動ダウンロード", "自分でファイルを落とす"],
 ])
-MODELS = ("日本語 3 本で比べた結果（RTX 4070）", ["モデル", "ファイル", "VRAM", "GPU", "CPU", "3 本の結果"], [
+MODELS = ("日本語 3 本で比べた結果（RTX 4070）", ["モデル", "ファイル", "VRAM", "GPU（常駐）", "CPU（読み込み込み）", "3 本の結果"], [
     ["small", "488MB", "894MiB", "約 0.1 秒", "約 2.6 秒", "第2会議室 → 第2回技術"],
     ["large-v3-turbo（q5_0）", "574MB", "984MiB", "約 0.1 秒", "約 8.7 秒", "清書 → 聖書"],
     ["medium", "1.5GB", "2,034MiB", "約 0.2 秒", "約 7.4 秒", "3 本とも正しい"],
@@ -167,7 +167,9 @@ SLIDES = {
     24: table(*VS),
     25: table(*VS, hl=[1, 2]),
     27: term(["$ sudo pacman -S whisper-cpp        # macOS なら brew install whisper-cpp",
-              "$ whisper-server --help | head -3   # CUDA0: NVIDIA GeForce RTX 4070 と出れば GPU で動く"]),
+              "$ whisper-server --help | head -2",
+              "ggml_cuda_init: found 1 CUDA devices (Total VRAM: 11952 MiB):",
+              "  Device 0: NVIDIA GeForce RTX 4070, compute capability 8.9, VMM: yes, VRAM: 11952 MiB"], hl=[3]),
     28: image("hf-whisper-files.png"),
     30: table(*MODELS),
     31: table(*MODELS, hl=[0]),
