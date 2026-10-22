@@ -1,0 +1,34 @@
+surface	reading	annotate
+VOICEVOX ENGINE	ボイスボックスエンジン	yes
+VOICEVOX	ボイスボックス	yes
+voice-chat	ボイスチャット	yes
+Docker Hub	ドッカーハブ	
+nvidia-container-toolkit	エヌビディアコンテナツールキット	yes
+nvidia-ctk	エヌビディアシーティーケー	
+nvidia-latest	エヌビディアレイテスト	
+cpu-latest	シーピーユーレイテスト	
+--gpus all	ジーピーユーズオール	
+audio_query	オーディオクエリ	yes
+streaming_synthesis	ストリーミングシンセシス	
+persona	ペルソナ	
+aliases	エイリアシズ	
+characters.toml	キャラクターズトムル	
+TOML	トムル	
+pw-play	ピーダブリュープレイ	
+Server-Sent Events	サーバーセントイベンツ	
+MiB	メビバイト	
+GB	ギガバイト	
+ctx-size	コンテキストサイズ	
+history.json	ヒストリージェイソン	
+gemma-4-E4B-it	ジェマフォー、イーフォービー	yes
+E4B	イーフォービー	
+qat	キューエーティー	
+12B	じゅうにビー	
+SUPER+SHIFT+H	スーパー、シフト、エイチ	
+RTX 4070	アールティーエックス、ヨンマルナナマル	
+127.0.0.1	いちにーなな、てん、ぜろ、てん、ぜろ、てん、いち	
+50021	ごーまるまるにーいち	
+zunko.jp	ずんこドットジェーピー	
+README	リードミー	
+貴女	あなた	
+タメ口	タメぐち	
