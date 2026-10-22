@@ -88,6 +88,12 @@ curl -s http://127.0.0.1:50021/speakers   # 声の一覧（スタイル ID は�
 残りの時間はほとんど VOICEVOX（Docker の CPU 版）が最初の 1 文を合成する時間。GPU 版との比較は未測定。
 このときの GPU 使用量は 8.4GB（whisper-server と E4B を読み込んだ状態）。
 
+## 台本での VOICEVOX の扱い（2026-10-22 決定）
+
+- 台本では GPU 版の入れ方（nvidia-container-toolkit、--gpus all など）は割愛する。重すぎるため
+- 「GPU 版にするともっと速い（声が出るまで約 0.2 秒）」と結果だけ言い、詳しい手順は記事（概要欄のリンク）を見てもらうよう誘導する
+- 記事には GPU 版の手順をそのまま残す
+
 ## CPU 版と GPU 版の VOICEVOX（2026-10-22 23:20 ごろ）
 
 nvidia-container-toolkit 1.20.1 を入れ、voicevox/voicevox_engine:nvidia-latest（0.25.2、約 3GB）を 50022 番に立てて比べた。
