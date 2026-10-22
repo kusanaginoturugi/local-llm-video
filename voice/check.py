@@ -66,7 +66,7 @@ def main():
 
     with open(os.path.join(episode.VOICE_OUT, "timeline.tsv"), newline="") as f:
         rows = list(csv.DictReader(f, delimiter="\t"))
-    slug = {"めたん": "metan", "ずんだもん": "zundamon"}
+    slug = {"めたん": "metan", "ずんだもん": "zundamon", "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon"}
     results = []
     for r in rows:
         no = int(r["no"])

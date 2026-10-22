@@ -38,8 +38,11 @@ PANEL = (40, 43, 54)
 TEXT = (236, 238, 244)
 MUTED = (150, 156, 172)
 HL = (255, 214, 102)
-COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70)}
+COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70),
+         "パソコンのめたん": (234, 96, 160), "パソコンのずんだもん": (110, 190, 70)}
 SLUG = {"めたん": "metan", "ずんだもん": "zundamon"}
+# 音声ファイルの名前。「パソコンの〜」は第3弾のデモで返事をする voice-chat のキャラ（立ち絵は動かさない）
+VOICE_SLUG = {**SLUG, "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon"}
 FADE = 0.4  # 章の変わり目で、見出しの前後をフェードでつなぐ秒数
 ANNOTATE_ONCE = True  # False にすると、用語が出るたびに毎回読みを添える
 BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔王魂「アコースティック51」ループ版
@@ -57,6 +60,7 @@ BGM_FILTER = "highpass=f=150,lowpass=f=3500"  # 帯域を絞って声の後ろ�
 JP = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
 JP_BOLD = "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"
 MONO = "/usr/share/fonts/TTF/Cica-Regular.ttf"
+EMOJI = "/usr/share/fonts/noto/NotoColorEmoji.ttf"  # カラー絵文字（109px のビットマップだけを持つ）
 _fonts = {}
 
 
@@ -82,6 +86,32 @@ def wrap(text, f, width):
         else:
             cur += tok
     return lines + [cur] if cur else lines
+
+
+EMOJI_RE = None
+
+
+def draw_text_emoji(img, xy, text, f, fill):
+    """絵文字だけ Noto Color Emoji で描く（ふつうのフォントだと豆腐になる）。"""
+    import re
+    global EMOJI_RE
+    EMOJI_RE = EMOJI_RE or re.compile(r"([\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF]\ufe0f?)")
+    d = ImageDraw.Draw(img)
+    x, y = xy
+    for part in EMOJI_RE.split(text):
+        if not part:
+            continue
+        if EMOJI_RE.fullmatch(part):
+            g = Image.new("RGBA", (136, 128), (0, 0, 0, 0))
+            ImageDraw.Draw(g).text((0, 0), part, font=font(EMOJI, 109), embedded_color=True)
+            g = g.crop(g.getbbox() or (0, 0, 1, 1))
+            sz = int(f.size * 0.95)
+            g = g.resize((sz, int(g.height * sz / max(g.width, 1))), Image.LANCZOS)
+            img.paste(g, (int(x), int(y + f.size * 0.2)), g)
+            x += sz + 4
+        else:
+            d.text((x, y), part, font=f, fill=fill)
+            x += f.getlength(part)
 
 
 def fit_font(lines, path, start, width, mono=False):
@@ -155,6 +185,37 @@ def draw_slide(img, spec, section):
             color = (130, 220, 130) if l.startswith("$") else (HL if i in hl else TEXT)
             d.text((x0 + 40, y), l, font=f, fill=color)
             y += lh
+    elif kind == "chat":
+        # 会話の吹き出し。あなたは右、キャラは左。新しい発言が下に来て、入りきらない古い発言は上から消える
+        _, head, msgs, hl = spec
+        d.rounded_rectangle(SLIDE_BOX, 18, fill=(16, 17, 22))
+        d.rounded_rectangle((x0, y0, x1, y0 + 56), 18, fill=PANEL)
+        d.rectangle((x0, y0 + 36, x1, y0 + 56), fill=PANEL)
+        d.text((x0 + 30, y0 + 28), head, font=font(JP, 26), fill=MUTED, anchor="lm")
+        f, fn = font(JP, 36), font(JP_BOLD, 26)
+        bw = (x1 - x0) * 0.72
+        blocks = []
+        for i, (who, text) in enumerate(msgs):
+            lines = [l for para in text.split("\n") for l in (wrap(para, f, bw - 60) or [""])]
+            blocks.append((i, who, lines, 40 + len(lines) * 52 + 30))
+        y = y1 - 30
+        for i, who, lines, h in reversed(blocks):
+            if y - h < y0 + 80:
+                # いちばん新しい発言が長すぎるときは、入るところまで出して「…」で切る
+                if i != blocks[-1][0]:
+                    break
+                keep = max(1, int((y - (y0 + 80) - 70) // 52))
+                lines = lines[:keep - 1] + [lines[keep - 1].rstrip() + "…"]
+                h = 40 + len(lines) * 52 + 30
+            me = who == "あなた"
+            bx0 = x1 - 40 - bw if me else x0 + 40
+            fill = (40, 70, 110) if me else ((70, 62, 30) if i in hl else (40, 44, 56))
+            d.rounded_rectangle((bx0, y - h, bx0 + bw, y - 10), 22, fill=fill,
+                                outline=HL if i in hl else None, width=3)
+            d.text((bx0 + 30, y - h + 14), who, font=fn, fill=MUTED)
+            for j, l in enumerate(lines):
+                draw_text_emoji(img, (bx0 + 30, y - h + 52 + j * 52), l, f, TEXT)
+            y -= h + 14
     elif kind == "flow":
         # 横に並べた箱を矢印でつなぐ流れ図。箱は (名前, 説明の行…)。hl の箱を強調し、notes を下に並べる
         _, head, boxes, hl, notes = spec
@@ -330,7 +391,7 @@ def load_lines():
     for r in tl:
         no = int(r["no"])
         spec = SLIDES.get(no, spec)
-        with open(os.path.join(VOICE, f"{no:03d}_{SLUG[r['speaker']]}.json")) as f:
+        with open(os.path.join(VOICE, f"{no:03d}_{VOICE_SLUG[r['speaker']]}.json")) as f:
             q = json.load(f)
         lines.append({
             "no": no, "speaker": r["speaker"], "text": r["text"],

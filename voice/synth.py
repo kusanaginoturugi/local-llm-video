@@ -39,6 +39,9 @@ ENGINE = os.environ.get("VOICEVOX_URL", "http://localhost:50021")
 SPEAKERS = {
     "めたん": {"slug": "metan", "id": 2, "speedScale": 1.0, "pan": -0.35},
     "ずんだもん": {"slug": "zundamon", "id": 3, "speedScale": 1.18, "pan": 0.35},
+    # 第3弾のデモで返事をする voice-chat のキャラ。解説役とは別人なので中央から鳴らし、速さは voice-chat の設定に合わせる
+    "パソコンのずんだもん": {"slug": "pc_zundamon", "id": 3, "speedScale": 1.15, "pan": 0.0, "base": "ずんだもん"},
+    "パソコンのめたん": {"slug": "pc_metan", "id": 2, "speedScale": 1.0, "pan": 0.0, "base": "めたん"},
 }
 GAP_SEC = 0.35  # all.wav で行と行の間に入れる無音（direction.tsv の gap で上書き）
 
@@ -97,7 +100,7 @@ def voice_for(r, direction, styles):
     spk = dict(SPEAKERS[r["speaker"]])
     d = direction.get(r["no"], {})
     if d.get("style"):
-        spk["id"] = styles[r["speaker"]][d["style"]]
+        spk["id"] = styles[spk.get("base", r["speaker"])][d["style"]]
     if d.get("intonation"):
         spk["intonationScale"] = float(d["intonation"])
     return spk
