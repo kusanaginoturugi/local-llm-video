@@ -64,7 +64,7 @@ RULES = [
     "・数字や英語は、読み上げやすい書き方にする。",
     "・会話が続くよう、最後に相手への短い質問を 1 つ添える。",
     "・相手が話を終えようとしているとき（おやすみ、ありがとう、またね等）は、",
-    "　質問せずに気持ちよく締める。",
+    "  質問せずに気持ちよく締める。",
 ]
 STREAM = [
     "$ curl -sN http://127.0.0.1:8080/v1/chat/completions -d @req_stream.json",
@@ -108,12 +108,12 @@ money = switch + [said("money"), answer("money", "四国めたん")]
 interrupt_head = DEMO["interrupt"]["reply"].split("。")[0] + "。"
 
 SLIDES = {
-    1: title("ローカル LLM で遊ぼう", "第3弾　声で話しかけると声で返事をする AI"),
+    1: title("ローカル LLM で遊ぼう", "第3弾：声で話しかけると声で返事をする AI"),
     4: chat(HEAD, []),
     5: chat(HEAD, [said("open")]),
     6: chat(HEAD, [said("open"), answer("open")], hl=[1]),
     10: diagram(hl=[]),
-    12: big("RTX 4070　VRAM 12GB"),
+    12: big("RTX 4070・VRAM 12GB"),
     17: table(*STEPS),
     18: diagram(note=False),
     19: diagram(hl=[1], note=False),
@@ -147,7 +147,7 @@ SLIDES = {
         "ずんだ餅の精。年齢の概念なし",
         "やや不幸属性があり、ないがしろにされることもしばしば",
         "趣味：その辺をふらふらすること、自分を大きく見せること",
-        "一人称：ずんだもん、僕　二人称：オマエ"]),
+        "一人称：ずんだもん、僕／二人称：オマエ"]),
     56: chat(HEAD, [said("persona")]),
     57: chat(HEAD, [said("persona"), answer("persona")], hl=[1]),
     60: title("改善 3：会話の決まりを足す", "読み上げ向けに、短く、最後に質問"),
@@ -192,11 +192,11 @@ SLIDES = {
         "高等部二年生、17 歳。常に金欠。趣味は中二病妄想",
         "誰にでも遠慮しないので、基本的にタメ口",
         "性格は若干ツンデレ気味",
-        "一人称：わたくし　二人称：貴女、アンタ"]),
+        "一人称：わたくし／二人称：貴女、アンタ"]),
     126: table(*STEPS),
     127: table(*VRAM, hl=[3]),
     130: bullets("概要欄にあるもの", ["コード：github.com/kusanaginoturugi/voice-chat",
                                    "記事：声で話しかけると声で返事をする AI（作り方の詳細）"]),
     133: title("ご視聴ありがとうございました",
-               "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん　イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成"),
+               "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん / イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成"),
 }
