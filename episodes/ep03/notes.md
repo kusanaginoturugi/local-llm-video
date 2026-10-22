@@ -45,6 +45,38 @@
 つむぎに「めたんってどんな人？」→「めたん先輩は、結構真面目で優しいんだよ」。呼び方は合うが、中身は LLM の作り話
 （ほかのキャラの人物像は渡していない）。
 
+## 記事と動画に入れる：VOICEVOX の入れ方
+
+第1弾・第2弾は llama.cpp と whisper.cpp の入れ方から書いたので、VOICEVOX も入れ方から書く。
+使うのは画面のあるエディタではなく、裏で動く VOICEVOX ENGINE（HTTP の API で声を作る）。
+
+手元の環境は Docker の CPU 版（voicevox/voicevox_engine:cpu-latest、イメージ 4.31GB、エンジン 0.25.2）。
+コンテナ名 voicevox、--restart unless-stopped で、パソコンを起動すると一緒に立ち上がる。
+
+```sh
+# Docker を入れる（Arch 系）
+sudo pacman -S docker
+sudo systemctl enable --now docker
+
+# 公式 README のとおり。127.0.0.1 にだけ開く（外から使えないように）
+docker pull voicevox/voicevox_engine:cpu-latest
+docker run -d --name voicevox --restart unless-stopped \
+  -p '127.0.0.1:50021:50021' voicevox/voicevox_engine:cpu-latest
+
+# 動いたか確かめる
+curl http://127.0.0.1:50021/version
+curl -s http://127.0.0.1:50021/speakers   # 声の一覧（スタイル ID はここで分かる）
+```
+
+- 公式 README は `docker run --rm ...`（止めると消える）。常駐させたいので --name と --restart に変えた。
+- GPU 版は voicevox/voicevox_engine:nvidia-latest に `--gpus all`。VRAM をどれだけ使うか、速くなるかは未測定（見どころ候補）。
+- Docker を使わない方法: 公式リリース（https://github.com/VOICEVOX/voicevox_engine/releases/latest）からエンジン単体を落とす。
+  エディタ（https://voicevox.hiroshiba.jp/）を起動している間もエンジンが 50021 で動く。
+- 声を作る流れは 2 段: /audio_query（文章 → 読み方とアクセント）→ /synthesis（→ WAV）。台本では curl で見せる。
+- 利用規約: 声ごとに規約があり、動画などで使うときは「VOICEVOX:ずんだもん」のようにクレジットを書く。
+- 公式 README には /streaming_synthesis（合成しながら少しずつ返す）があるが、手元の 0.25.2 にはまだない
+  （/openapi.json で確認）。新しい版で使えれば、声が出るまでをさらに縮められるかもしれない。
+
 ## 実測（話し終えてから声が出るまで、文章で話しかけた場合）
 
 | | 返事の最初の文字 | 声が出始める |
