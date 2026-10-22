@@ -13,6 +13,9 @@ nvtop	エヌブイトップ	yes
 systemd	システムディー	yes
 journalctl	ジャーナルシーティーエル	yes
 Qwen	クウェン	yes
+Qwen 3	クウェンスリー	
+Qwen3	クウェンスリー	
+Gemma 4	ジェマフォー	
 Gemma	ジェマ	yes
 Q4_K_M	キューフォーケーエム	yes
 -hf	ハイフンエイチエフ	yes

@@ -32,6 +32,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `episode.py` | 作る回を決め、その回のファイルの場所を返す |
 | `voice/dict_common.tsv` | シリーズ共通の読み（毎回出てくる技術用語） |
 | `voice/synth.py` | VOICEVOX で一括合成し、その回の `out/voice/` に wav とタイムラインを出す |
+| `voice/check.py` | 合成した声を whisper-server で文字起こしし、台本とずれている行を一覧にする |
 | `video/slidekit.py` | `slides.py` で使う画面の部品（title・table・term・flow など） |
 | `video/make_mouths.py` | 公式の SD 絵から口パク用の差分（閉じ・半開き・開き）を作る |
 | `video/termshot.py` | コマンドを仮想の端末で動かし、画面を PNG にする（pyte が必要） |
@@ -62,6 +63,8 @@ EPISODE=ep01 python3 video/render.py   # 前の回を作り直す
 読みの置き換えは、行ごとの読み（`direction.tsv` の `yomi` 列、例 `九割五分=きゅうわりごぶ;黄色=きいろ`）→ この動画の辞書 → シリーズ共通の辞書の順に当てます。
 VOICEVOX 本体のユーザー辞書は変更しません。英字の語は単語の区切りでだけ置き換えます（`ini` は `Gemini` には当たりません）。
 1 か所だけの読み間違いは辞書に入れず、行ごとの読みで直してください。`annotate` 列が `yes` の語は、字幕で最初に出たときだけ「VRAM（ブイラム）」のように読みを添えます。
+
+耳が VOICEVOX の読み方に慣れると、聞き間違えやすい読みに気づきにくくなります。`python3 voice/check.py` で合成した声を whisper-server に文字起こしさせ、台本とずれている行を、ずれの大きい順に出せます（第1弾では「Qwen 3」が「クエン酸」と書き取られて見つかりました）。英語をカタカナで書き取るだけのずれも出るので、上から耳で確かめてください。
 
 確認用に、`video/render.py --preview 30`（先頭 30 秒）、`--still 64`（64 行目の 1 コマ）、`--description`（概要欄だけ）が使えます。
 
