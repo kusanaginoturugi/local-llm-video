@@ -5,7 +5,7 @@ CODE = "https://github.com/kusanaginoturugi/voice-chat"
 ARTICLE = "https://claude.ai/artifact/XUxWANTPfE6osvRi4zTb6U"
 SCRIPT_DOC = "https://claude.ai/artifact/XVRqxtD2fCeVedg1qbSC9c"
 EP01 = "https://youtu.be/3Sk9T1VqNsg"
-EP02 = ""  # TODO: 第2弾の URL
+EP02 = "https://youtu.be/k-ploGYRc_Q"
 
 # サムネイル（video/make_thumbnail.py）
 THUMBNAIL = {

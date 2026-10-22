@@ -8,6 +8,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
   - 記事: https://claude.ai/code/artifact/2be896e8-2ab9-4dd7-bf05-cff1beb45e71
   - 台本: https://claude.ai/code/artifact/45ace86b-536a-4dd5-a09a-cb9db2f17fa1
 - 第2弾：whisper.cpp で音声入力を作ろう（2026-10-22 公開、`episodes/ep02/`）
+  - 動画: https://youtu.be/k-ploGYRc_Q
   - 記事: https://claude.ai/artifact/Bdmebajj8SxkXZtU4cznmS
   - 台本: https://claude.ai/artifact/PJcRLgEeSwghav4EFVSSHE
   - 解説しているスクリプト: https://github.com/kusanaginoturugi/voice-input/tree/main/lite
