@@ -21,7 +21,7 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 20	めたん								何回使っても無料。ネットが切れていても動く。サー
 21	ずんだもん		1.3		jump	zunmon_3022			いいことだらけなのだ。
 22	めたん	ツンツン				met_s215			ただし、打ち込んだ先のアプリがクラウドなら、そこ
-23	ずんだもん		1.2	3.0					それで、whisper.cpp って何なのだ？
+23	ずんだもん		1.2	3.0			whisper.cpp=ウィスパー、シーピーピー		それで、whisper.cpp って何なのだ？
 24	めたん								声を文字にするモデル Whisper を、自分の
 25	めたん								だから使い方もそっくり。試すのが whisper
 26	ずんだもん								llama-cli と llama-server
@@ -79,7 +79,7 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 78	めたん								エディタなら改行ですが、チャットや AI の入力
 79	ずんだもん		1.4	0.2	shake	zunmon_3021			送信されちゃうのだ！
 80	めたん								話し終わった瞬間に、書きかけの文章が勝手に送られ
-81	ずんだもん	なみだめ			shake	zunmon_3020			Enter で送信するの、やめてほしいのだ……
+81	ずんだもん				shake	zunmon_3020			Enter で送信するの、やめてほしいのだ……
 82	めたん								キーの意味としては間違いじゃないんですけどね。で
 83	めたん								だから改行は、文字起こしでも清書の結果でも、全部
 84	めたん			3.0					今日のスクリプトは簡略版。元になった本家版には、
