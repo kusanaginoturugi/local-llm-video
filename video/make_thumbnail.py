@@ -12,7 +12,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 import episode  # noqa: E402
 
-THUMB = episode.module("meta").THUMBNAIL
+META = episode.module("meta")
+THUMB = getattr(META, "THUMBNAIL", {})
 OUT = os.path.join(episode.VIDEO_OUT, "thumbnail.png")
 BG_IMAGE = os.path.join(ROOT, "assets", "bg", "rgb_desk.jpg")
 SD = os.path.join(ROOT, "assets", "official", "sd")
@@ -45,6 +46,14 @@ def outlined(d, xy, text, f, fill, stroke, width, anchor="mm"):
 
 
 def main():
+    # その回の meta.py に thumbnail() があれば、その回専用の描き方を使う
+    if hasattr(META, "thumbnail"):
+        img = META.thumbnail({"W": W, "H": H, "font": font, "sd": sd, "cover": cover, "outlined": outlined,
+                              "BG_IMAGE": BG_IMAGE, "BLACK": BLACK, "BOLD": BOLD})
+        os.makedirs(os.path.dirname(OUT), exist_ok=True)
+        img.convert("RGB").save(OUT)
+        print(OUT)
+        return
     # 背景: 動画と同じ写真を、少しだけぼかして暗くする
     bg = cover(Image.open(BG_IMAGE).convert("RGB"), W, H).filter(ImageFilter.GaussianBlur(4))
     bg = ImageEnhance.Brightness(bg).enhance(0.6).convert("RGBA")
