@@ -4,6 +4,10 @@ REPO = "https://github.com/kusanaginoturugi/local-llm-video"
 ARTICLE = "https://claude.ai/code/artifact/2be896e8-2ab9-4dd7-bf05-cff1beb45e71"
 SCRIPT_DOC = "https://claude.ai/code/artifact/45ace86b-536a-4dd5-a09a-cb9db2f17fa1"
 
+# 公開後に見つかった読み間違いの訂正。概要欄のいちばん上に置く
+NOTE = ("※ 音声の読み間違いの訂正：動画の中の「Qwen 3（クウェンサン）」は、「クウェンスリー」と読むのが正しいです。"
+        "「クエン酸」と聞こえるところがありますが、Alibaba のモデル Qwen 3 のことです。")
+
 # サムネイル（video/make_thumbnail.py）
 THUMBNAIL = {
     "badge": "第1弾",
@@ -18,6 +22,8 @@ THUMBNAIL = {
 def description(chapters):
     """概要欄の文面。chapters は「0:00 見出し」の行のリスト。"""
     return "\n".join([
+        NOTE,
+        "",
         "自分のパソコンで LLM（大規模言語モデル）のサーバーを立ち上げる、「ローカル LLM で遊ぼう」シリーズの第1弾です。",
         "llama.cpp の llama-server を使い、Hugging Face から落とした 2 つのモデルを 1 つのサーバーで切り替えて使えるようにして、",
         "systemd で常駐させるところまでを、四国めたんとずんだもんの掛け合いで解説します。",
