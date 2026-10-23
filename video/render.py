@@ -39,10 +39,10 @@ TEXT = (236, 238, 244)
 MUTED = (150, 156, 172)
 HL = (255, 214, 102)
 COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70),
-         "パソコンのめたん": (234, 96, 160), "パソコンのずんだもん": (110, 190, 70)}
+         "パソコンのめたん": (234, 96, 160), "パソコンのずんだもん": (110, 190, 70), "ひまり": (150, 140, 230)}
 SLUG = {"めたん": "metan", "ずんだもん": "zundamon"}
 # 音声ファイルの名前。「パソコンの〜」は第3弾のデモで返事をする voice-chat のキャラ（立ち絵は動かさない）
-VOICE_SLUG = {**SLUG, "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon"}
+VOICE_SLUG = {**SLUG, "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon", "ひまり": "himari"}
 FADE = 0.4  # 章の変わり目で、見出しの前後をフェードでつなぐ秒数
 ANNOTATE_ONCE = True  # False にすると、用語が出るたびに毎回読みを添える
 BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔王魂「アコースティック51」ループ版
@@ -55,6 +55,7 @@ VIDEO_CODEC = {
     "x264": ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20"],
 }[os.environ.get("VCODEC", "nvenc")]
 BGM_VOLUME = 0.12
+SING_BGM = 0.15  # 歌の行のあいだの BGM の音量（ふだんの何割にするか）
 BGM_FILTER = "highpass=f=150,lowpass=f=3500"  # 帯域を絞って声の後ろに下げる（空にすると原音のまま）
 
 JP = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
@@ -386,7 +387,8 @@ def load_lines():
     with open(episode.path("screens.tsv"), newline="") as f:
         sections = {r["no"]: r["section"] for r in csv.DictReader(f, delimiter="\t")}
     with open(episode.path("direction.tsv"), newline="") as f:
-        reacts = {r["no"]: r.get("react", "") for r in csv.DictReader(f, delimiter="\t")}
+        direction = {r["no"]: r for r in csv.DictReader(f, delimiter="\t")}
+    reacts = {no: d.get("react", "") for no, d in direction.items()}
     lines, spec = [], SLIDES[1]
     for r in tl:
         no = int(r["no"])
@@ -398,6 +400,7 @@ def load_lines():
             "start": float(r["start"]), "end": float(r["end"]),
             "section": sections.get(r["no"], ""), "spec": spec, "motion": r.get("motion", ""),
             "react": reacts.get(r["no"], ""),
+            "sing": bool(direction.get(r["no"], {}).get("sing")),
             "track": mouth_track(q, float(r["start"])),
         })
     annotate(lines)
@@ -587,9 +590,12 @@ def main():
     n_frames = math.ceil(total * FPS)
     name = "preview.mp4" if args.preview else "video.mp4"
     # BGM はセリフの間だけ音量を下げる（sidechaincompress）。最初と最後はフェード
+    # 歌の行（direction.tsv の sing 列）のあいだは、1 秒かけて BGM を 15% まで絞り、歌のあとに戻す
+    sing_duck = "*".join(f"(1-{1 - SING_BGM:.2f}*clip((t-{l['start'] - 1:.2f}),0,1)*clip(({l['end'] + 1:.2f}-t),0,1))"
+                         for l in lines if l["sing"]) or "1"
     afilter = (
         "[1:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit[voice][key];"
-        f"[2:a]aformat=sample_rates=48000:channel_layouts=stereo,{BGM_FILTER + ',' if BGM_FILTER else ''}volume={BGM_VOLUME},"
+        f"[2:a]aformat=sample_rates=48000:channel_layouts=stereo,{BGM_FILTER + ',' if BGM_FILTER else ''}volume={BGM_VOLUME},volume='{sing_duck}':eval=frame,"
         f"afade=t=in:d=2,afade=t=out:st={max(0, total - 4):.2f}:d=4[bgm];"
         "[bgm][key]sidechaincompress=threshold=0.02:ratio=6:attack=40:release=700[duck];"
         "[voice][duck]amix=inputs=2:normalize=0:duration=longest[a]"

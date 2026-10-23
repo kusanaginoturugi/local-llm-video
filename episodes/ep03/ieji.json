@@ -1,0 +1,140 @@
+{
+ "fade": 5.0,
+ "notes": [
+  {
+   "key": null,
+   "frame_length": 12,
+   "lyric": ""
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 72,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 72,
+   "frame_length": 160,
+   "lyric": "ら"
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 67,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 65,
+   "frame_length": 160,
+   "lyric": "ら"
+  },
+  {
+   "key": null,
+   "frame_length": 12,
+   "lyric": ""
+  },
+  {
+   "key": 67,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 72,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 67,
+   "frame_length": 320,
+   "lyric": "ら"
+  },
+  {
+   "key": null,
+   "frame_length": 12,
+   "lyric": ""
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 72,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 72,
+   "frame_length": 160,
+   "lyric": "ら"
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 67,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 65,
+   "frame_length": 160,
+   "lyric": "ら"
+  },
+  {
+   "key": null,
+   "frame_length": 12,
+   "lyric": ""
+  },
+  {
+   "key": 67,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 69,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 67,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 65,
+   "frame_length": 80,
+   "lyric": "ら"
+  },
+  {
+   "key": 65,
+   "frame_length": 320,
+   "lyric": "ら"
+  },
+  {
+   "key": null,
+   "frame_length": 30,
+   "lyric": ""
+  }
+ ]
+}

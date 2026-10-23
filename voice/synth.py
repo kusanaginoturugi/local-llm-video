@@ -42,6 +42,8 @@ SPEAKERS = {
     # 第3弾のデモで返事をする voice-chat のキャラ。解説役とは別人なので中央から鳴らし、速さは voice-chat の設定に合わせる
     "パソコンのずんだもん": {"slug": "pc_zundamon", "id": 3, "speedScale": 1.15, "pan": 0.0, "base": "ずんだもん"},
     "パソコンのめたん": {"slug": "pc_metan", "id": 2, "speedScale": 1.0, "pan": 0.0, "base": "めたん"},
+    # 第3弾のデモで voice-chat に話しかける役（冥鳴ひまり）。解説の 2 人と聞き分けやすいよう別の声にし、中央から鳴らす
+    "ひまり": {"slug": "himari", "id": 14, "speedScale": 1.0, "pan": 0.0, "sing_id": 3014},
 }
 GAP_SEC = 0.35  # all.wav で行と行の間に入れる無音（direction.tsv の gap で上書き）
 
@@ -106,6 +108,49 @@ def voice_for(r, direction, styles):
     return spk
 
 
+SING_QUERY_SPEAKER = 6000  # 楽譜から歌い方（音の高さと長さ）を作る歌い手（波音リツ）。声はその行の話者で出す
+FADE_SEC = 5.0  # 歌の行は、終わりをこの秒数かけてフェードアウトする（楽譜の JSON の fade で変えられる）
+
+
+def sing_line(base, spk, score_name):
+    """direction.tsv の sing 列に書いた楽譜（その回のフォルダの JSON）を、話者の声で歌わせる。
+
+    VOICEVOX の歌は 2 段階: /sing_frame_audio_query で楽譜から歌い方を作り、/frame_synthesis で声にする。
+    長い楽譜を一度に渡すと推論に失敗するので、楽譜の休符（key が null）で区切ってフレーズごとに歌わせ、つなぐ。
+    口パクは付けないので、口パク用のクエリは空にしておく。
+    """
+    with open(episode.path(score_name)) as f:
+        score_file = json.load(f)
+    notes = score_file["notes"]
+    phrases, cur = [], []
+    for n in notes:
+        if n["key"] is None and cur:
+            phrases.append(cur)
+            cur = []
+        cur.append(n)
+    if any(n["key"] is not None for n in cur):
+        phrases.append(cur)
+    params, frames = None, bytearray()
+    rest = {"key": None, "frame_length": 10, "lyric": ""}
+    for ph in phrases:
+        score = {"notes": ([] if ph[0]["key"] is None else [rest]) + ph + [rest]}
+        q = json.loads(post("/sing_frame_audio_query", {"speaker": SING_QUERY_SPEAKER}, score))
+        with open(base + ".wav", "wb") as f:
+            f.write(post("/frame_synthesis", {"speaker": spk["sing_id"]}, q))
+        with wave.open(base + ".wav") as w:
+            params = params or w.getparams()
+            frames += w.readframes(w.getnframes())
+    n, fade = len(frames) // 2, int(score_file.get("fade", FADE_SEC) * params.framerate)  # 楽譜の fade で上書きできる
+    for i in range(max(0, n - fade), n):  # 終わりを直線で絞る（16bit モノラル）
+        v = int.from_bytes(frames[i * 2:i * 2 + 2], "little", signed=True)
+        frames[i * 2:i * 2 + 2] = int(v * (n - i) / fade).to_bytes(2, "little", signed=True)
+    with wave.open(base + ".wav", "wb") as w:
+        w.setparams(params)
+        w.writeframes(bytes(frames))
+    with open(base + ".json", "w") as f:
+        json.dump({"accent_phrases": [], "speedScale": 1.0, "prePhonemeLength": 0.0}, f)
+
+
 def make_query(text, spk, kana=None):
     q = json.loads(post("/audio_query", {"speaker": spk["id"], "text": text}))
     if kana:
@@ -167,6 +212,10 @@ def main():
         if only is None and not args.force and os.path.exists(base + ".wav"):
             continue
         spk = voice_for(r, direction, styles)
+        if direction.get(r["no"], {}).get("sing"):
+            sing_line(base, spk, direction[r["no"]]["sing"])
+            print(f"{no:03d} {r['speaker']}: （歌）{direction[r['no']]['sing']}", file=sys.stderr)
+            continue
         q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), words, common), spk,
                        direction.get(r["no"], {}).get("kana"))
         with open(base + ".wav", "wb") as f:
