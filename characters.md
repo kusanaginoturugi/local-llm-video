@@ -60,6 +60,22 @@
 | つむぎ | めたん先輩 | ずんだもん先輩 | あーし | ひまっち |
 | ひまり | めたん先輩 | ずんだもん先輩 | つむぎ先輩 | 私 |
 
+### 先輩・後輩は年齢ではなく、VOICEVOX に入った順（推測）
+
+つむぎもひまりも 18 歳なのに、17 歳のめたんを「めたん先輩」と呼ぶ。年齢の概念がないずんだもんも「ずんだもん先輩」で、
+同じ 18 歳どうしでも、ひまりはつむぎを「つむぎ先輩」と呼ぶ。VOICEVOX に入った時期と見比べると、入った順の先輩・後輩になっている
+（キャラ紹介のページが「ボイボ寮」なので、寮に入った順と考えられる）。公式にそう書かれたものは見つけていない。
+
+| キャラ | VOICEVOX に入った時期 |
+| --- | --- |
+| 四国めたん・ずんだもん | 2021 年 8 月（最初の版から） |
+| 春日部つむぎ・波音リツ | 2021 年 11 月（0.9） |
+| 雨晴はう | 2021 年 12 月ごろ（0.9.4 の更新履歴に名前がある） |
+| 冥鳴ひまり | 2022 年 2 月（0.11） |
+
+ネタに使える。たとえば、つむぎ「てか、年上のあーしが、なんで 17 歳のめたん先輩を先輩って呼んでんの？」→
+めたん「寮に入ったのは、わたくしのほうが先だもの」（第4弾からのタメ口で）。
+
 ## 出典
 
 - [四国めたん｜ボイボ寮](https://voicevox.hiroshiba.jp/dormitory/shikoku_metan/)（[呼び方](https://voicevox.hiroshiba.jp/dormitory/shikoku_metan/calls/)）
@@ -68,3 +84,4 @@
 - [冥鳴ひまり｜ボイボ寮](https://voicevox.hiroshiba.jp/dormitory/meimei_himari/)（[呼び方](https://voicevox.hiroshiba.jp/dormitory/meimei_himari/calls/)）
 - [東北ずん子・ずんだもんプロジェクト](https://zunko.jp/)、[キャラクター利用ガイドライン](https://zunko.jp/guideline.html)
 - [冥鳴ひまり 利用規約](https://www.meimeihimari.com/terms-of-use)
+- [VOICEVOX の更新履歴（GitHub Releases）](https://github.com/VOICEVOX/voicevox/releases)（0.9.1、0.9.4、0.11.1 でキャラの追加を確認）
