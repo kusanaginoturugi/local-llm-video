@@ -45,11 +45,25 @@ def outlined(d, xy, text, f, fill, stroke, width, anchor="mm"):
     d.text(xy, text, font=f, fill=fill, stroke_width=width, stroke_fill=stroke, anchor=anchor)
 
 
+CATCH = "ちょっといいゲーミング PC でできる"  # シリーズのキャッチフレーズ。毎回同じ位置・同じ形で右上に置く
+
+
+def catch_badge(img):
+    """右上にキャッチフレーズの札を置く（左上のシリーズ名の札と対になる）。"""
+    d = ImageDraw.Draw(img)
+    f = font(BLACK, 28)
+    w = f.getlength(CATCH)
+    x1 = W - 24
+    d.rounded_rectangle((x1 - w - 44, 20, x1, 76), 14, fill=YELLOW, outline=(20, 20, 30), width=3)
+    d.text((x1 - w / 2 - 22, 48), CATCH, font=f, fill=(20, 20, 30), anchor="mm")
+
+
 def main():
     # その回の meta.py に thumbnail() があれば、その回専用の描き方を使う
     if hasattr(META, "thumbnail"):
         img = META.thumbnail({"W": W, "H": H, "font": font, "sd": sd, "cover": cover, "outlined": outlined,
                               "BG_IMAGE": BG_IMAGE, "BLACK": BLACK, "BOLD": BOLD})
+        catch_badge(img)
         os.makedirs(os.path.dirname(OUT), exist_ok=True)
         img.convert("RGB").save(OUT)
         print(OUT)

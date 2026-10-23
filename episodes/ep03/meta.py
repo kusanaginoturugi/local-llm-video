@@ -12,7 +12,7 @@ THUMBNAIL = {
     "badge": "第3弾",
     "title": "声で話すと",
     "title2": "声で返事！",
-    "sub": "ゲーミング PC 1 台で全部動く",
+    "sub": "whisper.cpp × llama.cpp × VOICEVOX",
     "metan": "met_s214",
     "zundamon": "zunmon_3022",
 }
@@ -118,8 +118,8 @@ def thumbnail(k):
 
     # 下: 何を使うか（左右のキャラの間に収める）
     d.rounded_rectangle((300, 560, 980, 650), 18, fill=(0, 0, 0, 170))
-    d.text((640, 588), "ゲーミング PC 1 台で全部動く", font=font(k["BOLD"], 38), fill=green, anchor="mm")
-    d.text((640, 626), "whisper.cpp × llama.cpp × VOICEVOX", font=font(k["BOLD"], 30), fill=(255, 255, 255), anchor="mm")
+    d.text((640, 588), "whisper.cpp × llama.cpp × VOICEVOX", font=font(k["BOLD"], 32), fill=green, anchor="mm")
+    d.text((640, 626), "全部自分のパソコンの中で", font=font(k["BOLD"], 30), fill=(255, 255, 255), anchor="mm")
 
     # キャラクター: 左下にめたん、右下にずんだもん（喜んでいる表情）
     metan = k["sd"]("met_s214", 300)
