@@ -39,6 +39,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `episode.py` | 作る回を決め、その回のファイルの場所を返す |
 | `voice/dict_common.tsv` | シリーズ共通の読み（毎回出てくる技術用語） |
 | `voice/synth.py` | VOICEVOX で一括合成し、その回の `out/voice/` に wav とタイムラインを出す |
+| `voice/score.py` | 音名と長さを並べたテキストから、VOICEVOX の歌の楽譜（JSON）を作る。direction.tsv の sing 列に .txt を書けば synth.py が直接読む |
 | `voice/check.py` | 合成した声を whisper-server で文字起こしし、台本とずれている行を一覧にする |
 | `video/slidekit.py` | `slides.py` で使う画面の部品（title・table・term・flow など） |
 | `video/make_mouths.py` | 公式の SD 絵から口パク用の差分（閉じ・半開き・開き）を作る |

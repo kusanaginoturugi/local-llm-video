@@ -113,14 +113,20 @@ FADE_SEC = 5.0  # 歌の行は、終わりをこの秒数かけてフェード�
 
 
 def sing_line(base, spk, score_name):
-    """direction.tsv の sing 列に書いた楽譜（その回のフォルダの JSON）を、話者の声で歌わせる。
+    """direction.tsv の sing 列に書いた楽譜（その回のフォルダの .txt か JSON）を、話者の声で歌わせる。
+
+    .txt は voice/score.py の書き方（音名と長さを並べ、| の右に歌詞）。
 
     VOICEVOX の歌は 2 段階: /sing_frame_audio_query で楽譜から歌い方を作り、/frame_synthesis で声にする。
     長い楽譜を一度に渡すと推論に失敗するので、楽譜の休符（key が null）で区切ってフレーズごとに歌わせ、つなぐ。
     口パクは付けないので、口パク用のクエリは空にしておく。
     """
     with open(episode.path(score_name)) as f:
-        score_file = json.load(f)
+        if score_name.endswith(".txt"):  # 音名と長さを並べたテキスト（voice/score.py の書き方）
+            import score
+            score_file = score.convert(f.read())
+        else:
+            score_file = json.load(f)
     notes = score_file["notes"]
     phrases, cur = [], []
     for n in notes:
