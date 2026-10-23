@@ -504,6 +504,9 @@ BUST_BOTTOM = {
     "zunmon_3017": 0.80, "zunmon_3019": 0.74, "zunmon_3020": 0.78, "zunmon_3021": 0.68, "zunmon_3022": 0.76,
     "zunmon_3030": 0.9,
 }
+# 表情違いの絵ごとの拡大率。絵によって顔の大きさが違うので、ふだんの絵（metan）と顔の幅がそろうようにする。
+# 横にはみ出す分は切る（見切れてよい）
+FACE_SCALE = {"met_s214": 0.85, "met_s215": 1.29, "met_s218": 0.9, "met_s221": 0.85, "met_s222": 0.9}
 _sd = {}
 
 
@@ -513,6 +516,9 @@ def bust(im, key):
     im = im.crop((0, 0, im.width, round(im.height * BUST_BOTTOM.get(key, 0.62))))
     h = round(BUST_H * CHAR_SCALE[key[:3]])
     im = im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
+    if key in FACE_SCALE:
+        f = FACE_SCALE[key]
+        im = im.resize((round(im.width * f), round(im.height * f)), Image.LANCZOS)
     max_w = SIDE - 16
     if im.width > max_w:
         left = (im.width - max_w) // 2

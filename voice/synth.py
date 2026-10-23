@@ -140,10 +140,14 @@ def sing_line(base, spk, score_name):
         with wave.open(base + ".wav") as w:
             params = params or w.getparams()
             frames += w.readframes(w.getnframes())
-    n, fade = len(frames) // 2, int(score_file.get("fade", FADE_SEC) * params.framerate)  # 楽譜の fade で上書きできる
-    for i in range(max(0, n - fade), n):  # 終わりを直線で絞る（16bit モノラル）
-        v = int.from_bytes(frames[i * 2:i * 2 + 2], "little", signed=True)
-        frames[i * 2:i * 2 + 2] = int(v * (n - i) / fade).to_bytes(2, "little", signed=True)
+    # 楽譜の gain で全体の音量を、fade で終わりを絞る秒数を変えられる。16bit モノラル
+    n, fade = len(frames) // 2, int(score_file.get("fade", FADE_SEC) * params.framerate)
+    gain = score_file.get("gain", 1.0)
+    samples = array.array("h", bytes(frames))
+    for i in range(n):
+        k = gain * (min(1.0, (n - i) / fade) if fade else 1.0)
+        samples[i] = int(samples[i] * k)
+    frames = bytearray(samples.tobytes())
     with wave.open(base + ".wav", "wb") as w:
         w.setparams(params)
         w.writeframes(bytes(frames))

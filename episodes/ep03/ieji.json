@@ -1,5 +1,6 @@
 {
- "fade": 5.0,
+ "gain": 0.55,
+ "fade": 15.0,
  "notes": [
   {
    "key": null,
