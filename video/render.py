@@ -207,7 +207,7 @@ def draw_slide(img, spec, section):
                 keep = max(1, int((y - (y0 + 80) - 70) // 52))
                 lines = lines[:keep - 1] + [lines[keep - 1].rstrip() + "…"]
                 h = 40 + len(lines) * 52 + 30
-            me = who == "あなた"
+            me = who.startswith("あなた")
             bx0 = x1 - 40 - bw if me else x0 + 40
             fill = (40, 70, 110) if me else ((70, 62, 30) if i in hl else (40, 44, 56))
             d.rounded_rectangle((bx0, y - h, bx0 + bw, y - 10), 22, fill=fill,

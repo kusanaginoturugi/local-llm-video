@@ -106,6 +106,9 @@ bye = movie + [said("bye"), answer("bye")]
 switch = [said("switch"), answer("switch", "四国めたん")]
 money = switch + [said("money"), answer("money", "四国めたん")]
 interrupt_head = DEMO["interrupt"]["reply"].split("。")[0] + "。"
+ME = "あなた（解説のずんだもん）"
+self1 = [(ME, DEMO["self_switch"]["heard"]), answer("self_switch")]
+self2 = self1 + [(ME, DEMO["self_talk"]["heard"]), answer("self_talk")]
 
 SLIDES = {
     1: title("ローカル LLM で遊ぼう", "第3弾：声で話しかけると声で返事をする AI"),
@@ -166,37 +169,42 @@ SLIDES = {
     80: table("声が出るまでの内訳（返事を全部待つ作り）", ["", "かかった時間"], [
         ["返事を書く（llama-server）", "0.21〜0.33 秒"],
         ["声を作る（VOICEVOX CPU 版）", "1.2〜1.9 秒"]], hl=[1]),
-    82: term(STREAM, hl=[1, 2, 3]),
-    83: flow("1 文できたら、すぐ読み始める", [
+    83: term(STREAM, hl=[1, 2, 3]),
+    84: flow("1 文できたら、すぐ読み始める", [
         ("llama-server", "少しずつ届く", "「。」で 1 文に"),
         ("VOICEVOX", "1 文ずつ声に", "次の文も先に"),
         ("再生", "読み始める", "その間に次を合成")]),
-    85: big("1.83 秒 → 0.95 秒"),
-    87: title("改善 5：使ってみて見つかった穴をふさぐ", "作っているときには気づかない"),
-    89: chat(HEAD, [said("interrupt")]),
-    90: chat(HEAD, [said("interrupt"), ("ずんだもん", interrupt_head + "\n（ここでキーを押して止める）")], hl=[1]),
-    96: chat(HEAD, [(YOU, "（何も言わずにキーを押した）\n文字起こし：(音楽)")]),
-    97: chat(HEAD, [(YOU, "（何も言わずにキーを押した）\n文字起こし：(音楽)"), answer("music")], hl=[1]),
-    101: title("改善 6：VOICEVOX を GPU 版にする", "声を作る時間を減らす"),
-    104: table(*PER_PROMPT),
-    106: table(*MEDIANS, hl=[1]),
-    107: big("GPU 版の入れ方は、概要欄の記事へ"),
-    108: big("1.83 秒 → 0.95 秒 → 0.22 秒"),
-    109: title("改善 7：名前を呼んでキャラを交代する", "ずんだもん・めたん・つむぎ"),
-    110: code("characters.toml（めたん・抜粋）", TOML, hl=[2]),
-    112: chat(HEAD, [said("switch")]),
-    113: chat(HEAD, switch, hl=[1]),
-    114: chat(HEAD, switch + [said("money")]),
-    115: chat(HEAD, money, hl=[3]),
-    117: bullets("四国めたん（VOICEVOX ボイボ寮より）", [
+    86: big("1.83 秒 → 0.95 秒"),
+    88: title("改善 5：使ってみて見つかった穴をふさぐ", "作っているときには気づかない"),
+    90: chat(HEAD, [said("interrupt")]),
+    91: chat(HEAD, [said("interrupt"), ("ずんだもん", interrupt_head + "\n（ここでキーを押して止める）")], hl=[1]),
+    99: chat(HEAD, [(YOU, "（何も言わずにキーを押した）\n文字起こし：(音楽)")]),
+    100: chat(HEAD, [(YOU, "（何も言わずにキーを押した）\n文字起こし：(音楽)"), answer("music")], hl=[1]),
+    104: title("改善 6：VOICEVOX を GPU 版にする", "声を作る時間を減らす"),
+    107: table(*PER_PROMPT),
+    109: table(*MEDIANS, hl=[1]),
+    110: big("GPU 版の入れ方は、概要欄の記事へ"),
+    111: big("1.83 秒 → 0.95 秒 → 0.22 秒"),
+    112: title("改善 7：名前を呼んでキャラを交代する", "ずんだもん・めたん・つむぎ"),
+    113: code("characters.toml（めたん・抜粋）", TOML, hl=[2]),
+    115: chat(HEAD, [said("switch")]),
+    116: chat(HEAD, switch, hl=[1]),
+    120: chat(HEAD, switch + [said("money")]),
+    121: chat(HEAD, money, hl=[3]),
+    123: bullets("四国めたん（VOICEVOX ボイボ寮より）", [
         "高等部二年生、17 歳。常に金欠。趣味は中二病妄想",
         "誰にでも遠慮しないので、基本的にタメ口",
         "性格は若干ツンデレ気味",
         "一人称：わたくし／二人称：貴女、アンタ"]),
-    126: table(*STEPS),
-    127: table(*VRAM, hl=[3]),
-    130: bullets("概要欄にあるもの", ["コード：github.com/kusanaginoturugi/voice-chat",
+    132: table(*STEPS),
+    133: table(*VRAM, hl=[3]),
+    136: bullets("概要欄にあるもの", ["コード：github.com/kusanaginoturugi/voice-chat",
                                    "記事：声で話しかけると声で返事をする AI（作り方の詳細）"]),
-    133: title("ご視聴ありがとうございました",
+    138: chat(HEAD, []),
+    139: chat(HEAD, self1[:1]),
+    140: chat(HEAD, self1, hl=[1]),
+    141: chat(HEAD, self2[:3]),
+    142: chat(HEAD, self2, hl=[3]),
+    146: title("ご視聴ありがとうございました",
                "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん / イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成"),
 }

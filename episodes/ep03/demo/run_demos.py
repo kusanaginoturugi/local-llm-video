@@ -57,37 +57,43 @@ PERSONA = ZUN["persona"].strip()
 FULL = PERSONA + "\n" + vc.RULES.strip()
 FULL_MET = MET["persona"].strip() + "\n" + vc.RULES.strip()
 
-out = {}
-rain = "明日は雨らしいんだけど、何して過ごそうかな"
-for key, system, history, said in [
-    ("open", FULL, [], rain),
-    ("one_line", ONE_LINE, [], rain),
-    ("persona", PERSONA, [], rain),
-]:
-    text = heard(said)
-    out[key] = {"said": said, "heard": text, "reply": reply(system, history, text)}
-    print(key, out[key], file=sys.stderr)
 
-# 改善 3: 雨 → 映画 → またね（履歴つき）
-hist = []
-for key, said in [("rain", rain), ("movie", "映画かなあ。最近見てないし"), ("bye", "ありがとう、じゃあまたね")]:
-    text = heard(said)
-    r = reply(FULL, hist, text)
-    hist += [{"role": "user", "content": text}, {"role": "assistant", "content": r}]
-    out[key] = {"said": said, "heard": text, "reply": r}
-    print(key, out[key], file=sys.stderr)
+def main():
+    out = {}
+    rain = "明日は雨らしいんだけど、何して過ごそうかな"
+    for key, system, history, said in [
+        ("open", FULL, [], rain),
+        ("one_line", ONE_LINE, [], rain),
+        ("persona", PERSONA, [], rain),
+    ]:
+        text = heard(said)
+        out[key] = {"said": said, "heard": text, "reply": reply(system, history, text)}
+        print(key, out[key], file=sys.stderr)
 
-# 改善 5: 遮る（返事の頭だけ使う）、「(音楽)」に答える
-for key, said in [("interrupt", "ずんだ餅の作り方を詳しく教えて")]:
-    text = heard(said)
-    out[key] = {"said": said, "heard": text, "reply": reply(FULL, [], text)}
-out["music"] = {"said": "（無音）", "heard": "(音楽)", "reply": reply(FULL, [], "(音楽)")}
+    # 改善 3: 雨 → 映画 → またね（履歴つき）
+    hist = []
+    for key, said in [("rain", rain), ("movie", "映画かなあ。最近見てないし"), ("bye", "ありがとう、じゃあまたね")]:
+        text = heard(said)
+        r = reply(FULL, hist, text)
+        hist += [{"role": "user", "content": text}, {"role": "assistant", "content": r}]
+        out[key] = {"said": said, "heard": text, "reply": r}
+        print(key, out[key], file=sys.stderr)
 
-# 改善 7: めたんに交代して、お金の話
-text = heard("めたんに代わって")
-out["switch"] = {"said": "めたんに代わって", "heard": text, "reply": MET["greeting"]}
-text = heard("最近お金がなくてさ")
-out["money"] = {"said": "最近お金がなくてさ", "heard": text, "reply": reply(FULL_MET, [], text)}
-for k in ("interrupt", "music", "switch", "money"):
-    print(k, out[k], file=sys.stderr)
-json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
+    # 改善 5: 遮る（返事の頭だけ使う）、「(音楽)」に答える
+    for key, said in [("interrupt", "ずんだ餅の作り方を詳しく教えて")]:
+        text = heard(said)
+        out[key] = {"said": said, "heard": text, "reply": reply(FULL, [], text)}
+    out["music"] = {"said": "（無音）", "heard": "(音楽)", "reply": reply(FULL, [], "(音楽)")}
+
+    # 改善 7: めたんに交代して、お金の話
+    text = heard("めたんに代わって")
+    out["switch"] = {"said": "めたんに代わって", "heard": text, "reply": MET["greeting"]}
+    text = heard("最近お金がなくてさ")
+    out["money"] = {"said": "最近お金がなくてさ", "heard": text, "reply": reply(FULL_MET, [], text)}
+    for k in ("interrupt", "music", "switch", "money"):
+        print(k, out[k], file=sys.stderr)
+    json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
+
+
+if __name__ == "__main__":
+    main()
