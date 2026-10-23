@@ -49,7 +49,7 @@ def description(chapters):
         "",
         "■ これまでの回",
         f"第1弾：llama-server を立ち上げよう {EP01}",
-        f"第2弾：whisper.cpp で音声入力を作ろう {EP02}",
+        f"第2弾：音声入力で \"Hello, Computer ?\" しようぜ {EP02}",
         "",
         "■ ソースコード（台本・音声合成・動画生成）",
         REPO,
