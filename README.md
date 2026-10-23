@@ -35,6 +35,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `episodes/epNN/meta.py` | 概要欄の文面とサムネイルの文言 |
 | `episodes/epNN/demo/` | 撮影や検証に使った設定と素材 |
 | `episodes/epNN/out/` | 生成物（音声 `voice/`、動画・概要欄・字幕・サムネイル `video/`）。リポジトリには入れない |
+| `characters.md` | 登場キャラクターの公式設定と、この動画での扱い（話し方・お互いの呼び方） |
 | `episode.py` | 作る回を決め、その回のファイルの場所を返す |
 | `voice/dict_common.tsv` | シリーズ共通の読み（毎回出てくる技術用語） |
 | `voice/synth.py` | VOICEVOX で一括合成し、その回の `out/voice/` に wav とタイムラインを出す |
