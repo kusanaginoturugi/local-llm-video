@@ -9,10 +9,11 @@ EP02 = "https://youtu.be/k-ploGYRc_Q"
 
 # サムネイル（video/make_thumbnail.py）
 THUMBNAIL = {
-    "badge": "第3弾",
-    "title": "声で話すと",
-    "title2": "声で返事！",
-    "sub": "whisper.cpp × llama.cpp × VOICEVOX",
+    "number": 3,
+    "color": (164, 222, 70),            # 背景の色（第3弾はずんだ色）
+    "title": "ずんだもんと",
+    "title2": "声で会話",
+    "pill": ("返事まで", "0.2秒"),
     "metan": "met_s214",
     "zundamon": "zunmon_3022",
 }
@@ -79,55 +80,3 @@ def description(chapters):
         "",
         "#ローカルLLM #VOICEVOX #ずんだもん #四国めたん #llamacpp #whispercpp",
     ])
-
-
-def thumbnail(k):
-    """サムネイル。話しかけるとずんだもんが声で返事をするところを、そのまま絵にする。
-
-    k は video/make_thumbnail.py から渡される道具（大きさ・フォント・SD 絵など）。
-    """
-    from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
-
-    W, H, font, out = k["W"], k["H"], k["font"], k["outlined"]
-    ink, yellow, pink, green = (20, 20, 30), (255, 214, 64), (255, 110, 180), (120, 220, 80)
-
-    # 背景: 写真を明るめに残し、緑から橙へのグラデーションを重ねる（第1弾の緑青、第2弾の青紫と見分けられるように）
-    bg = k["cover"](Image.open(k["BG_IMAGE"]).convert("RGB"), W, H).filter(ImageFilter.GaussianBlur(6))
-    bg = ImageEnhance.Brightness(bg).enhance(0.8).convert("RGBA")
-    grad = Image.new("RGBA", (W, H))
-    gd = ImageDraw.Draw(grad)
-    for x in range(W):
-        t = x / W
-        gd.line((x, 0, x, H), fill=(int(40 + 180 * t), int(140 - 40 * t), int(70 - 30 * t), 170))
-    bg.alpha_composite(grad)
-    d = ImageDraw.Draw(bg)
-
-    # 上: シリーズ名と回数
-    d.rounded_rectangle((24, 20, 500, 76), 14, fill=(0, 0, 0, 150))
-    d.text((44, 48), "ローカル LLM で遊ぼう", font=font(k["BOLD"], 32), fill=(255, 255, 255), anchor="lm")
-    d.rounded_rectangle((394, 28, 490, 68), 10, fill=pink)
-    d.text((442, 48), "第3弾", font=font(k["BLACK"], 26), fill=(255, 255, 255), anchor="mm")
-
-    # 見出し（2 行）
-    out(d, (W // 2, 150), "ずんだもんと", font(k["BLACK"], 92), (255, 255, 255), ink, 10)
-    out(d, (W // 2, 265), "声でおしゃべり！", font(k["BLACK"], 104), yellow, ink, 12)
-
-    # 真ん中: あなた（右）の吹き出しと、ずんだもん（左）の返事
-    d.rounded_rectangle((640, 340, 1130, 420), 24, fill=(70, 120, 200), outline=ink, width=4)
-    d.text((885, 380), "明日は雨。何しよう？", font=font(k["BOLD"], 40), fill=(255, 255, 255), anchor="mm")
-    d.rounded_rectangle((280, 430, 910, 545), 26, fill=(255, 255, 255), outline=ink, width=5)
-    d.text((595, 468), "おうちでゆっくりするのだ。", font=font(k["BLACK"], 40), fill=ink, anchor="mm")
-    d.text((595, 512), "オマエは何が好きなのだ？", font=font(k["BLACK"], 36), fill=(40, 140, 40), anchor="mm")
-    out(d, (430, 380), "返事まで 約0.2秒", font(k["BLACK"], 44), yellow, ink, 8)
-
-    # 下: 何を使うか（左右のキャラの間に収める）
-    d.rounded_rectangle((300, 560, 980, 650), 18, fill=(0, 0, 0, 170))
-    d.text((640, 588), "whisper.cpp × llama.cpp × VOICEVOX", font=font(k["BOLD"], 32), fill=green, anchor="mm")
-    d.text((640, 626), "全部自分のパソコンの中で", font=font(k["BOLD"], 30), fill=(255, 255, 255), anchor="mm")
-
-    # キャラクター: 左下にめたん、右下にずんだもん（喜んでいる表情）
-    metan = k["sd"]("met_s214", 300)
-    zun = k["sd"]("zunmon_3022", 290)
-    bg.alpha_composite(metan, (10, H - metan.height + 80))
-    bg.alpha_composite(zun, (W - zun.width - 20, H - zun.height + 20))
-    return bg

@@ -10,12 +10,13 @@ NOTE = ("※ 音声の読み間違いの訂正：動画の中の「Qwen 3（ク�
 
 # サムネイル（video/make_thumbnail.py）
 THUMBNAIL = {
-    "badge": "第1弾",
-    "title": "llama-server",           # 1 行目（黄色・大きく）
-    "title2": "を立ち上げよう！",        # 2 行目
-    "sub": "2 モデル常駐・切り替え一瞬・OOM 対策",
-    "metan": "met_s214",                # 左に置くめたんの SD 絵
-    "zundamon": "zunmon_3022",          # 右に置くずんだもんの SD 絵
+    "number": 1,
+    "color": (120, 200, 255),           # 背景の色（第1弾は水色）
+    "title": "自分のパソコンに",          # 1 行目
+    "title2": "AIサーバー",              # 2 行目（いちばん大きく）
+    "pill": ("VRAM", "12GB"),           # 下の黒い札（小さい言葉、黄色で大きく見せる言葉）
+    "metan": "met_s214",                # 左下に置くめたんの SD 絵
+    "zundamon": "zunmon_3022",          # 右下に置くずんだもんの SD 絵
 }
 
 
@@ -71,58 +72,3 @@ def description(chapters):
         "",
         "#ローカルLLM #llamacpp #ずんだもん #四国めたん #VOICEVOX",
     ])
-
-
-def thumbnail(k):
-    """サムネイル。1 つの llama-server から 2 つのモデルを切り替えて使うところを、そのまま絵にする。
-
-    k は video/make_thumbnail.py から渡される道具（大きさ・フォント・SD 絵など）。
-    """
-    from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
-
-    W, H, font, out = k["W"], k["H"], k["font"], k["outlined"]
-    ink, yellow, pink, green = (20, 20, 30), (255, 214, 64), (255, 110, 180), (120, 220, 80)
-
-    # 背景: 写真を明るめに残し、緑から青へのグラデーションを重ねる（第2弾の青紫と見分けられるように）
-    bg = k["cover"](Image.open(k["BG_IMAGE"]).convert("RGB"), W, H).filter(ImageFilter.GaussianBlur(6))
-    bg = ImageEnhance.Brightness(bg).enhance(0.8).convert("RGBA")
-    grad = Image.new("RGBA", (W, H))
-    gd = ImageDraw.Draw(grad)
-    for x in range(W):
-        t = x / W
-        gd.line((x, 0, x, H), fill=(int(10 + 20 * t), int(120 - 50 * t), int(110 + 90 * t), 170))
-    bg.alpha_composite(grad)
-    d = ImageDraw.Draw(bg)
-
-    # 上: シリーズ名と回数
-    d.rounded_rectangle((24, 20, 500, 76), 14, fill=(0, 0, 0, 150))
-    d.text((44, 48), "ローカル LLM で遊ぼう", font=font(k["BOLD"], 32), fill=(255, 255, 255), anchor="lm")
-    d.rounded_rectangle((394, 28, 490, 68), 10, fill=pink)
-    d.text((442, 48), "第1弾", font=font(k["BLACK"], 26), fill=(255, 255, 255), anchor="mm")
-
-    # 見出し（2 行）
-    out(d, (W // 2, 150), "自分のパソコンに", font(k["BLACK"], 88), (255, 255, 255), ink, 10)
-    out(d, (W // 2, 265), "AI サーバーを立てる！", font(k["BLACK"], 96), yellow, ink, 12)
-
-    # 真ん中: llama-server（窓口 1 つ）から 2 つのモデルへ
-    d.rounded_rectangle((170, 365, 560, 485), 24, fill=(255, 255, 255), outline=ink, width=5)
-    d.text((365, 405), "llama-server", font=font(k["BLACK"], 46), fill=ink, anchor="mm")
-    d.text((365, 455), "窓口は 1 つ", font=font(k["BOLD"], 30), fill=(90, 90, 100), anchor="mm")
-    for y in (380, 470):
-        d.line((560, 425, 740, y), fill=yellow, width=8)
-    for y, name in ((345, "Gemma 4"), (435, "Qwen3")):
-        d.rounded_rectangle((740, y, 1110, y + 72), 18, fill=(255, 250, 225), outline=yellow, width=6)
-        d.text((925, y + 36), name, font=font(k["BLACK"], 42), fill=ink, anchor="mm")
-    out(d, (860, 535), "名前を変えるだけで切り替え", font(k["BOLD"], 30), (255, 255, 255), ink, 6)
-
-    # 下: 何を使うか（左右のキャラの間に収める）
-    d.rounded_rectangle((300, 575, 980, 665), 18, fill=(0, 0, 0, 170))
-    d.text((640, 603), "llama.cpp × VRAM 12GB", font=font(k["BOLD"], 38), fill=green, anchor="mm")
-    d.text((640, 641), "2 モデル常駐・切り替え一瞬・OOM 対策", font=font(k["BOLD"], 28), fill=(255, 255, 255), anchor="mm")
-
-    # キャラクター: 左下にめたん、右下にずんだもん（喜んでいる表情）
-    metan = k["sd"]("met_s214", 300)
-    zun = k["sd"]("zunmon_3022", 290)
-    bg.alpha_composite(metan, (10, H - metan.height + 80))
-    bg.alpha_composite(zun, (W - zun.width - 20, H - zun.height + 20))
-    return bg

@@ -1,38 +1,51 @@
 #!/usr/bin/env python3
 """YouTube のサムネイル（1280x720）を作る。その回の out/video/thumbnail.png に保存する。
 
-文言と SD 絵はその回の meta.py の THUMBNAIL で決める。
+文言と色はその回の meta.py の THUMBNAIL で決める。
+
+  THUMBNAIL = {
+      "number": 3,                       # 第何弾か（左上の札に「#3」と出る）
+      "color": (164, 222, 70),           # 背景の色（回ごとに変えて、一覧で見分けられるようにする）
+      "title": "ずんだもんと",            # 1 行目
+      "title2": "声で会話",               # 2 行目（いちばん大きく）
+      "pill": ("返事まで", "0.2秒"),      # 下の黒い札（小さい言葉、黄色で大きく見せる言葉）
+      "metan": "met_s214",               # 左下に置くめたんの SD 絵
+      "zundamon": "zunmon_3022",         # 右下に置くずんだもんの SD 絵
+  }
+
+作りは「一色の背景に、大きな黒い文字と、黒い札が 1 つ」。小さい文字は一覧の大きさ（320x180）では読めないので入れない。
 """
 import os
 import sys
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 import episode  # noqa: E402
 
 META = episode.module("meta")
-THUMB = getattr(META, "THUMBNAIL", {})
+THUMB = META.THUMBNAIL
 OUT = os.path.join(episode.VIDEO_OUT, "thumbnail.png")
-BG_IMAGE = os.path.join(ROOT, "assets", "bg", "rgb_desk.jpg")
 SD = os.path.join(ROOT, "assets", "official", "sd")
 BLACK = "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc"
 BOLD = "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"
 W, H = 1280, 720
-YELLOW = (255, 214, 64)
-GREEN = (120, 220, 80)
-PINK = (255, 110, 180)
+INK = (17, 17, 17)
+WHITE = (255, 255, 255)
+YELLOW = (255, 220, 0)
+CATCH = "ちょっといいゲーミング PC でできる"  # シリーズのキャッチフレーズ。毎回同じ位置・同じ形で右上に置く
 
 
 def font(path, size):
     return ImageFont.truetype(path, size, index=0)
 
 
-def cover(im, w, h):
-    r = max(w / im.width, h / im.height)
-    im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
-    return im.crop(((im.width - w) // 2, (im.height - h) // 2, (im.width - w) // 2 + w, (im.height - h) // 2 + h))
+def fit(text, size, max_width):
+    """横幅に収まるまで文字を小さくする。"""
+    while font(BLACK, size).getlength(text) > max_width:
+        size -= 4
+    return font(BLACK, size)
 
 
 def sd(name, height):
@@ -41,60 +54,48 @@ def sd(name, height):
     return im.resize((round(im.width * height / im.height), height), Image.LANCZOS)
 
 
-def outlined(d, xy, text, f, fill, stroke, width, anchor="mm"):
-    d.text(xy, text, font=f, fill=fill, stroke_width=width, stroke_fill=stroke, anchor=anchor)
-
-
-CATCH = "ちょっといいゲーミング PC でできる"  # シリーズのキャッチフレーズ。毎回同じ位置・同じ形で右上に置く
-
-
-def catch_badge(img):
-    """右上にキャッチフレーズの札を置く（左上のシリーズ名の札と対になる）。"""
-    d = ImageDraw.Draw(img)
-    f = font(BLACK, 28)
+def badges(d):
+    """左上にシリーズ名と回数、右上にキャッチフレーズ。どちらも黒い角丸の札に白い文字。"""
+    d.rounded_rectangle((24, 22, 470, 74), 26, fill=INK)
+    d.text((48, 48), "ローカル LLM で遊ぼう", font=font(BOLD, 30), fill=WHITE, anchor="lm")
+    d.text((440, 48), f"#{THUMB['number']}", font=font(BLACK, 30), fill=WHITE, anchor="rm")
+    f = font(BLACK, 26)
     w = f.getlength(CATCH)
-    x1 = W - 24
-    d.rounded_rectangle((x1 - w - 44, 20, x1, 76), 14, fill=YELLOW, outline=(20, 20, 30), width=3)
-    d.text((x1 - w / 2 - 22, 48), CATCH, font=f, fill=(20, 20, 30), anchor="mm")
+    d.rounded_rectangle((W - 24 - w - 48, 22, W - 24, 74), 26, fill=INK)
+    d.text((W - 24 - w / 2 - 24, 48), CATCH, font=f, fill=WHITE, anchor="mm")
+
+
+def pill(img, small, big):
+    """下の真ん中に、黒い角丸の札。小さい言葉は白、大きく見せる言葉は黄色。札の下に影を落とす。"""
+    f1, f2 = font(BLACK, 44), font(BLACK, 92)
+    gap = f1.getlength(" ")
+    w = f1.getlength(small) + gap + f2.getlength(big)
+    box = (W / 2 - w / 2 - 40, 500, W / 2 + w / 2 + 40, 640)
+    shade = Image.new("RGBA", (W, H))
+    ImageDraw.Draw(shade).rounded_rectangle(box, 30, fill=(0, 0, 0, 110))
+    img.alpha_composite(shade.filter(ImageFilter.GaussianBlur(14)), (0, 10))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 30, fill=INK)
+    d.text((box[0] + 40, 586), small, font=f1, fill=WHITE, anchor="ls")
+    d.text((box[0] + 40 + f1.getlength(small) + gap, 600), big, font=f2, fill=YELLOW, anchor="ls")
 
 
 def main():
-    # その回の meta.py に thumbnail() があれば、その回専用の描き方を使う
-    if hasattr(META, "thumbnail"):
-        img = META.thumbnail({"W": W, "H": H, "font": font, "sd": sd, "cover": cover, "outlined": outlined,
-                              "BG_IMAGE": BG_IMAGE, "BLACK": BLACK, "BOLD": BOLD})
-        catch_badge(img)
-        os.makedirs(os.path.dirname(OUT), exist_ok=True)
-        img.convert("RGB").save(OUT)
-        print(OUT)
-        return
-    # 背景: 動画と同じ写真を、少しだけぼかして暗くする
-    bg = cover(Image.open(BG_IMAGE).convert("RGB"), W, H).filter(ImageFilter.GaussianBlur(4))
-    bg = ImageEnhance.Brightness(bg).enhance(0.6).convert("RGBA")
-    # 文字の下を少し暗くして読みやすくする
-    shade = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(shade).rectangle((0, 150, W, 560), fill=(0, 0, 0, 120))
-    bg.alpha_composite(shade)
-
-    # キャラクター: 左にめたん、右にずんだもん（どちらも喜んでいる表情）
-    metan = sd(THUMB["metan"], 470)
-    zun = sd(THUMB["zundamon"], 520)
-    bg.alpha_composite(metan, (-30, H - metan.height + 40))
-    bg.alpha_composite(zun, (W - zun.width + 20, H - zun.height + 30))
-
-    d = ImageDraw.Draw(bg)
-    # 上のシリーズ名と回数
-    outlined(d, (W // 2, 70), "ローカル LLM で遊ぼう", font(BOLD, 54), (255, 255, 255), (20, 20, 30), 6)
-    d.rounded_rectangle((W // 2 - 90, 112, W // 2 + 90, 160), 12, fill=PINK)
-    d.text((W // 2, 136), THUMB["badge"], font=font(BLACK, 34), fill=(255, 255, 255), anchor="mm")
-    # メインのタイトル（2 行）
-    outlined(d, (W // 2, 270), THUMB["title"], font(BLACK, 128), YELLOW, (20, 20, 30), 12)
-    outlined(d, (W // 2, 420), THUMB["title2"], font(BLACK, 100), (255, 255, 255), (20, 20, 30), 12)
-    # 下の補足
-    outlined(d, (W // 2, 525), THUMB["sub"], font(BOLD, 40), GREEN, (20, 20, 30), 6)
+    img = Image.new("RGBA", (W, H), tuple(THUMB["color"]) + (255,))
+    d = ImageDraw.Draw(img)
+    badges(d)
+    # 見出し（2 行）。左右のキャラにかからない幅に収める
+    d.text((W // 2, 185), THUMB["title"], font=fit(THUMB["title"], 116, 1000), fill=INK, anchor="mm")
+    d.text((W // 2, 345), THUMB["title2"], font=fit(THUMB["title2"], 200, 1060), fill=INK, anchor="mm")
+    pill(img, *THUMB["pill"])
+    # キャラクター: 左下にめたん、右下にずんだもん
+    metan = sd(THUMB["metan"], 300)
+    zun = sd(THUMB["zundamon"], 290)
+    img.alpha_composite(metan, (10, H - metan.height + 80))
+    img.alpha_composite(zun, (W - zun.width - 20, H - zun.height + 20))
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    bg.convert("RGB").save(OUT)
+    img.convert("RGB").save(OUT)
     print(OUT)
 
 
