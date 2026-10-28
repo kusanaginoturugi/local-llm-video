@@ -21,6 +21,7 @@
 import argparse
 import array
 import csv
+import io
 import math
 import json
 import os
@@ -112,6 +113,14 @@ SING_QUERY_SPEAKER = 6000  # 楽譜から歌い方（音の高さと長さ）を
 FADE_SEC = 5.0  # 歌の行は、終わりをこの秒数かけてフェードアウトする（楽譜の JSON の fade で変えられる）
 
 
+def save_wav(path, data):
+    """WAV を書く。別の名前に書いてから置き換えるので、途中で失敗しても前の音声は残り、半端なファイルもできない
+    （半端な WAV が残ると、次に動かしたとき合成済みとして飛ばされ、all.wav を作るところで落ちる）。"""
+    with open(path + ".tmp", "wb") as f:
+        f.write(data)
+    os.replace(path + ".tmp", path)
+
+
 def sing_line(base, spk, score_name):
     """direction.tsv の sing 列に書いた楽譜（その回のフォルダの .txt か JSON）を、話者の声で歌わせる。
 
@@ -141,9 +150,7 @@ def sing_line(base, spk, score_name):
     for ph in phrases:
         score = {"notes": ([] if ph[0]["key"] is None else [rest]) + ph + [rest]}
         q = json.loads(post("/sing_frame_audio_query", {"speaker": SING_QUERY_SPEAKER}, score))
-        with open(base + ".wav", "wb") as f:
-            f.write(post("/frame_synthesis", {"speaker": spk["sing_id"]}, q))
-        with wave.open(base + ".wav") as w:
+        with wave.open(io.BytesIO(post("/frame_synthesis", {"speaker": spk["sing_id"]}, q))) as w:
             params = params or w.getparams()
             frames += w.readframes(w.getnframes())
     # 楽譜の gain で全体の音量を、fade で終わりを絞る秒数を変えられる。16bit モノラル
@@ -153,10 +160,11 @@ def sing_line(base, spk, score_name):
     for i in range(n):
         k = gain * (min(1.0, (n - i) / fade) if fade else 1.0)
         samples[i] = int(samples[i] * k)
-    frames = bytearray(samples.tobytes())
-    with wave.open(base + ".wav", "wb") as w:
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as w:
         w.setparams(params)
-        w.writeframes(bytes(frames))
+        w.writeframes(samples.tobytes())
+    save_wav(base + ".wav", buf.getvalue())
     with open(base + ".json", "w") as f:
         json.dump({"accent_phrases": [], "speedScale": 1.0, "prePhonemeLength": 0.0}, f)
 
@@ -228,8 +236,7 @@ def main():
             continue
         q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), words, common), spk,
                        direction.get(r["no"], {}).get("kana"))
-        with open(base + ".wav", "wb") as f:
-            f.write(post("/synthesis", {"speaker": spk["id"]}, q))
+        save_wav(base + ".wav", post("/synthesis", {"speaker": spk["id"]}, q))
         # 口パク用に、モーラごとの長さを含むクエリも残す
         with open(base + ".json", "w") as f:
             json.dump(q, f, ensure_ascii=False)
