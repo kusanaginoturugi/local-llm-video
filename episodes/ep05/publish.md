@@ -3,7 +3,7 @@
 ## YouTube に渡すファイル
 
 - タイトル案：`【ローカル LLM で遊ぼう #5】スキャンした本を検索できる PDF に｜NDLOCR-Lite × GPU`
-- 動画：`out/video/video.mp4`（1920×1080、H.264/AAC、約 10 分 7 秒）
+- 動画：`out/video/video.mp4`（1920×1080、H.264/AAC、9 分 53 秒）
 - サムネイル：`out/video/thumbnail.png`
 - 概要欄：`out/video/description.txt`（`meta.py` から生成）
 - 日本語字幕：`out/video/subtitles.srt`（台本 106 行、字幕の区切り 107 個）
