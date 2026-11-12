@@ -27,7 +27,15 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
   - 拡張の PLaMo 設定と実測条件は `episodes/ep04/notes.md` を参照
   - つむぎの乱入は公式イラストを参考にしたSD絵の怒り・笑顔差分を中央に表示する。画像は再配布せず、ローカルの `assets/official/tsumugi-sd-angry.png` と `assets/official/tsumugi-sd-happy.png` に置く
 
-第1〜3弾の制作には Claude Code、画面の撮影には Claude in Chrome を使用しました。第4弾の台本・記事・検証・動画の組み立てには Codex GPT-6-Sol を使用しました。
+- 第5弾：スキャンした本を NDLOCR-Lite で検索できる PDF に（`episodes/ep05/`）
+  - 記事: https://claude.ai/artifact/QaLfsP48pZJ9tTHoK1QNLQ（ソースは `episodes/ep05/article.html`）
+  - 台本は `episodes/ep05/build_script.py`、演出と章は `episodes/ep05/build_direction.py` から生成する
+  - デモの本は国立国会図書館デジタルコレクションの江戸川亂歩『一寸法師』（1935、保護期間満了）。`demo/fetch_ndl.sh` で取ってきて PDF にし、青空文庫版も落とす
+  - OCR の環境は `demo/setup.sh`（NDLOCR-Lite v1.4.0 と onnxruntime-gpu）。答え合わせは `demo/compare_aozora.py` と `demo/crop_candidates.py`、紙を白くする実験は `demo/clean.py`
+  - CPU と GPU の端末の画面は `video/termrec.py` で実行の記録を取り、時刻どおりに再生して作った（`demo/rec/`）。Firefox の検索の画面は `demo/rec/record_firefox.sh` で撮った
+  - 計測と答え合わせの数字、判断の経緯は `episodes/ep05/notes.md`
+
+第1〜3弾の制作には Claude Code、画面の撮影には Claude in Chrome を使用しました。第4弾の台本・記事・検証・動画の組み立てには Codex GPT-6-Sol、第5弾には Claude Code（Claude Opus 5.5）を使用しました。
 
 ## 構成
 
@@ -53,6 +61,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `video/slidekit.py` | `slides.py` で使う画面の部品（title・table・term・flow など） |
 | `video/make_mouths.py` | 公式の SD 絵から口パク用の差分（閉じ・半開き・開き）を作る |
 | `video/termshot.py` | コマンドを仮想の端末で動かし、画面を PNG にする（pyte が必要） |
+| `video/termrec.py` | コマンドを仮想の端末で動かして出力と時刻を記録し、あとで動画にする（pyte が必要） |
 | `video/render.py` | 動画 `video.mp4`、概要欄 `description.txt`、字幕 `subtitles.srt`（`--srt`）を作る |
 | `video/make_thumbnail.py` | サムネイル `thumbnail.png`（1280x720）を作る |
 | `assets/fetch_official.sh` | 公式の SD 絵（ふだんの絵とリアクション用の表情違い）を zunko.jp から取ってくる |

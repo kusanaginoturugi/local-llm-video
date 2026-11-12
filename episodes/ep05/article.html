@@ -1,0 +1,222 @@
+<title>スキャン本を検索できるPDFに</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@600;900&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 一段組みの読み物。左に細い朱の罫、コマンドと表は本文幅の箱に収める */
+:root {
+  --paper: #f7f8f6;
+  --panel: #eceeea;
+  --ink: #1d2433;
+  --muted: #5b6372;
+  --rule: #d6d9d3;
+  --stamp: #c23b2a;
+  --indigo: #2f4a8a;
+  --code-bg: #1f2430;
+  --code-fg: #e6e8ee;
+  --code-dim: #8e96a8;
+  --display: "Zen Old Mincho", "Noto Serif JP", "Hiragino Mincho ProN", serif;
+  --body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "Cica", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15181f; --panel: #1d212a; --ink: #e4e7ee; --muted: #a2a9b8; --rule: #2e3340;
+    --stamp: #ec6a55; --indigo: #8fa8e6; --code-bg: #0e1016; --code-fg: #e6e8ee; --code-dim: #8e96a8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15181f; --panel: #1d212a; --ink: #e4e7ee; --muted: #a2a9b8; --rule: #2e3340;
+  --stamp: #ec6a55; --indigo: #8fa8e6; --code-bg: #0e1016; --code-fg: #e6e8ee; --code-dim: #8e96a8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: 16.5px; line-height: 1.85;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 760px; margin: 0 auto; padding-block: 48px 80px; display: flex; flex-direction: column; gap: 40px; }
+header { border-left: 4px solid var(--stamp); padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+.series { font-size: 13px; letter-spacing: .08em; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 900; font-size: clamp(30px, 6vw, 44px); line-height: 1.3; margin: 0; text-wrap: balance; }
+.lead { margin: 0; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 25px; margin: 0; line-height: 1.4; text-wrap: balance; }
+h2 small { display: block; font-family: var(--body); font-size: 12.5px; font-weight: 700; letter-spacing: .1em; color: var(--stamp); }
+p { margin: 0; }
+a { color: var(--indigo); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+code { font-family: var(--mono); font-size: .9em; background: var(--panel); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.cmd { position: relative; background: var(--code-bg); color: var(--code-fg); border-radius: 8px; min-width: 0; }
+.cmd pre { margin: 0; padding: 16px 18px; overflow-x: auto; font-family: var(--mono); font-size: 14px; line-height: 1.7; }
+.cmd .c { color: var(--code-dim); }
+.cmd button {
+  position: absolute; top: 8px; right: 8px; font: 12px var(--body); color: var(--code-fg);
+  background: transparent; border: 1px solid var(--code-dim); border-radius: 6px; padding: 2px 10px; cursor: pointer;
+}
+.note { border-left: 3px solid var(--stamp); background: var(--panel); padding: 12px 16px; border-radius: 0 6px 6px 0; }
+.note b { color: var(--stamp); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 13px; color: var(--muted); font-weight: 700; }
+td.num { text-align: right; white-space: nowrap; }
+tr.gpu td { color: var(--indigo); font-weight: 700; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+figure img { width: 100%; border-radius: 6px; border: 1px solid var(--rule); background: #fff; }
+figcaption { font-size: 13px; color: var(--muted); }
+.big { font-family: var(--display); font-weight: 900; font-size: clamp(40px, 10vw, 64px); color: var(--stamp); line-height: 1.1; font-variant-numeric: tabular-nums; }
+ul, ol { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 4px; }
+footer { border-top: 1px solid var(--rule); padding-top: 20px; font-size: 13.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+  <header>
+    <span class="series">ローカル LLM で遊ぼう　第5弾の解説</span>
+    <h1>スキャンした本を、検索できる PDF にする</h1>
+    <p class="lead">自炊した本の PDF は、中身がページの写真だけなので、検索しても 0 件です。国立国会図書館の OCR「NDLOCR-Lite」で文字を読み取り、透明な文字としてページに重ねると、見た目はそのままで検索とコピーができるようになります。この記事は、そのいちばん短い手順と、動画で見せた計測と答え合わせの条件をまとめたものです。</p>
+  </header>
+
+  <section>
+    <h2><small>しくみ</small>写真の上に、見えない文字を重ねる</h2>
+    <p>OCR はページの画像から文字の位置と中身を読み取ります。NDLOCR-Lite は、その文字を元の位置に透明なテキストとして書き込んだ PDF を出せます。下の図は、その透明な文字をわざと青く描いたものです。縦書きの列の上に、きちんと重なっています。</p>
+    <figure>
+      <img src="issun-040-visible.jpg" alt="古い本の見開きの写真の上に、OCR で読み取った文字が青い字で縦書きの列ごとに重なっている" width="1248" height="872">
+      <figcaption>江戸川亂歩『一寸法師』（1935）70〜71 ページ。<code>--pdf-visible-text</code> で文字の層を青く描いた確認用の出力。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><small>手順 1</small>NDLOCR-Lite を入れる</h2>
+    <p>必要なのは git と Python 3.11 以上です（本家の README には 3.10 以上とありますが、v1.4.0 のパッケージ設定は 3.11 以上）。GPU がなくても動きます。</p>
+    <div class="cmd"><button type="button" data-copy>コピー</button><pre>git clone https://github.com/ndl-lab/ndlocr-lite
+cd ndlocr-lite
+pip install -r requirements.txt
+cd src</pre></div>
+    <p>仮想環境を分けたいときは <code>python3 -m venv</code> や <code>uv venv</code> で作ってから入れてください。動画では 2026-11-11 に出た v1.4.0（コミット <code>a25d456</code>）を使いました。</p>
+  </section>
+
+  <section>
+    <h2><small>手順 2</small>コマンド一本で、検索できる PDF を作る</h2>
+    <div class="cmd"><button type="button" data-copy>コピー</button><pre>mkdir out
+python3 ocr.py --sourcepdf book.pdf --output out \
+  --pdf-output book-ocr.pdf --pdf-render-dpi 300</pre></div>
+    <ul>
+      <li><code>--sourcepdf</code>：読ませる PDF（スキャンした本）</li>
+      <li><code>--output</code>：作業用のフォルダ。ページごとの文字（txt・json・xml）がここに出ます</li>
+      <li><code>--pdf-output</code>：できあがりの、検索できる PDF</li>
+      <li><code>--pdf-render-dpi</code>：ページを画像にするときの細かさ。既定は 150。文庫の小さい字には 300 にしています</li>
+    </ul>
+    <p class="note"><b>落とし穴：</b><code>--output</code> のフォルダが無いと、<code>Output Directory is not found.</code> と 1 行出すだけで、何も作らずに終わります。終了コードも 0 なので、スクリプトに組み込むと失敗に気づけません。フォルダは先に作っておきましょう。</p>
+  </section>
+
+  <section>
+    <h2><small>手順 3（任意）</small>GPU で速くする</h2>
+    <p>NVIDIA の GPU があれば、onnxruntime を GPU 版に入れ替えて <code>--device cuda</code> を付けるだけです。CUDA と cuDNN も pip で一緒に入ります。</p>
+    <div class="cmd"><button type="button" data-copy>コピー</button><pre>pip uninstall onnxruntime
+pip install 'onnxruntime-gpu[cuda,cudnn]==1.31.1'
+python3 ocr.py --sourcepdf book.pdf --output out \
+  --pdf-output book-ocr.pdf --pdf-render-dpi 300 --device cuda</pre></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>本</th><th>CPU（Core i5-13400F）</th><th>GPU（RTX 4070）</th></tr></thead>
+        <tbody>
+          <tr><td>文庫 356 ページ（自炊、300dpi）</td><td class="num">356.7 秒（約 6 分）</td><td class="num">67.5 秒</td></tr>
+          <tr><td>一寸法師 208 コマ（見開きの写真）</td><td class="num">295 秒</td><td class="num">105 秒</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>時間は <code>time</code> で測った実行全体（モデルの読み込み込み）。計測中も、GPU には VOICEVOX ENGINE や whisper-server などが常駐していました。NDLOCR-Lite を GPU で 2 本同時に走らせると、メモリが足りずに cuBLAS の確保で落ちました。見開きの大きな写真では GPU の差が小さくなります（約 2.8 倍）。</p>
+  </section>
+
+  <section>
+    <h2><small>確かめる</small>検索とコピー</h2>
+    <p>できた PDF を Firefox で開いて「明智」を検索すると、『一寸法師』の 1 冊（208 コマ）で 289 件見つかりました。文字を抜き出すと、旧字体もそのまま入っています。</p>
+    <div class="cmd"><button type="button" data-copy>コピー</button><pre>pdftotext -f 40 -l 40 book-ocr.pdf - | head</pre></div>
+    <p>縦書きの句読点は、縦書き用の字（<code>︒</code> <code>︑</code> など）として入ります。句読点まで含めた語で検索すると、ビューアによっては見つからないことがあるので、語だけで探すのが確実です。</p>
+  </section>
+
+  <section>
+    <h2><small>答え合わせ</small>字の正解率は、約 99.4%</h2>
+    <p class="big">99.4%</p>
+    <p>『一寸法師』は青空文庫にもあるので、OCR の結果と 1 文字ずつ突き合わせました。ただし青空文庫は 2004 年の全集が底本で、新しい字と今のかなづかいに直されています。そこで次のように見積もりました。</p>
+    <ol>
+      <li>空白・句読点・括弧を除き、小書きの仮名を大きい仮名にそろえ、ゝ・々を前の字に開いて、1 字 1 行にして <code>diff</code> で並べる。</li>
+      <li>本の中で 3 回以上出る置き換え（賣→売、ゐ→い など）と、くの字点の繰り返しは「表記の違い」として外す。残りの 628 か所が誤りの候補。</li>
+      <li>候補から無作為に 40 か所を選んで、元の画像で確かめる。OCR の誤りは 15 か所、残り 25 か所は版の違いで、OCR は原本どおりでした。</li>
+      <li>「表記の違い」に紛れていた、何度も繰り返す誤り（ビ／ピの取り違え、山野<b>夫</b>人→<b>天</b>人 など）を 36 か所の画像で確かめて足す。</li>
+    </ol>
+    <p>本文約 8 万 7 千字のうち、誤りは約 530〜550 字。1 万字に約 60 字です。句読点は数えておらず、標本も小さいので、99.1〜99.7% くらいの幅で見てください。</p>
+    <figure>
+      <img src="ocr-miss.jpg" alt="読み間違えた 2 か所の切り抜き。左は屋臺の字の上に赤い蔵書印が重なっている。右は可哀相の字" width="948" height="730">
+      <figcaption>読み間違いの例。「屋臺」は図書館の赤い蔵書印の下にあり「屠懸」と読まれた。「可哀相」は「可良相」。誤りには、句がまるごと抜けるものもある。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><small>やってみた</small>紙を白くしてから読ませると、悪くなった</h2>
+    <p>紙の茶色やしみを抜いて白くした画像を OCR に渡すと、抜けていた字は拾えるようになる一方、墨の薄いこの本では細い線まで消え、読み間違いがそれ以上に増えました（紋三→鮫三 など）。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>OCR に渡した画像</th><th>読めた字</th><th>誤りの候補</th></tr></thead>
+        <tbody>
+          <tr><td>そのまま</td><td class="num">87,044 字</td><td class="num">628 か所</td></tr>
+          <tr><td>白くする（制作者の自炊用の設定）</td><td class="num">87,503 字</td><td class="num">1,443 か所</td></tr>
+          <tr><td>白くする（薄い線を残す設定）</td><td class="num">87,387 字</td><td class="num">1,179 か所</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>制作者の自炊本でも、紙を白くするのは読む人の目のためで、OCR には白くする前の画像を読ませています。</p>
+  </section>
+
+  <section>
+    <h2><small>この先</small>残り 0.6% は、手間がかかる</h2>
+    <p>動画では割愛しましたが、制作者の手元では次のような工夫を重ねています。最初の 99.4% はコマンド一本、残りを削るのにもう二週間かかっています。</p>
+    <ul>
+      <li>行の画像に余白を足して、文字の認識だけをやり直す（枠が数ピクセル違うだけで句が抜けることがある）</li>
+      <li>もう一つの OCR（<a href="https://github.com/kotaro-kinoshita/yomitoku">YomiToku</a>）と読み比べ、食い違ったところだけを拾う</li>
+      <li>ルビを本文から外す。パ／バの取り違えは、単語を切り出して読み直す</li>
+      <li>傾いたページはまっすぐに直し、OCR は直す前の画像で読ませて、文字の位置だけ回して重ねる</li>
+      <li>決まらない食い違いはローカル LLM（Gemma 4 12B）に、順番を入れ替えて二回聞く。最後は人が画像で決める</li>
+      <li>原本が旧字体で統一されている字は、対応表で直す（掴→摑）</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><small>使ったもの</small>出典と注意</h2>
+    <ul>
+      <li><a href="https://github.com/ndl-lab/ndlocr-lite">NDLOCR-Lite</a>（国立国会図書館、CC BY 4.0）</li>
+      <li>デモの本：江戸川亂歩『一寸法師』（亂歩傑作選集 第4卷、平凡社、1935）。<a href="https://dl.ndl.go.jp/pid/1170887">国立国会図書館デジタルコレクション</a>（保護期間満了）</li>
+      <li>答え合わせ：<a href="https://www.aozora.gr.jp/cards/001779/card58053.html">青空文庫『一寸法師』</a>（底本 光文社文庫『江戸川乱歩全集 第2巻』、入力 nami、校正 まつもこ）</li>
+      <li>台本・計測と答え合わせのスクリプト：<a href="https://github.com/kusanaginoturugi/local-llm-video/tree/main/episodes/ep05">local-llm-video / episodes/ep05</a></li>
+    </ul>
+    <p class="note"><b>注意：</b>自炊した本の PDF は、自分で使う分だけにしてください。検索できるようにした PDF も、人に配ったり公開したりしないでください。</p>
+  </section>
+
+  <footer>
+    <span>『ローカル LLM で遊ぼう』第5弾の解説。計測は 2026-11-12〜13。</span>
+    <span>台本・記事・検証・動画の組み立て：Claude Code（Claude Opus 5.5）</span>
+  </footer>
+</main>
+
+<script>
+document.querySelectorAll("[data-copy]").forEach(function (button) {
+  button.addEventListener("click", function () {
+    var pre = button.parentElement.querySelector("pre");
+    var text = pre.innerText;
+    var done = function () { button.textContent = "コピーしました"; setTimeout(function () { button.textContent = "コピー"; }, 1500); };
+    var fallback = function () {
+      var range = document.createRange(); range.selectNodeContents(pre);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      button.textContent = "選択しました";
+    };
+    try {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } catch (e) { fallback(); }
+  });
+});
+</script>

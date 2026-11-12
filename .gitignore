@@ -18,3 +18,10 @@ sites/
 
 # デモ用に VOICEVOX で作った音声（.txt から作り直せる）
 episodes/*/demo/audio/*.wav
+
+# 第5弾のデモ用に国会図書館から取ってきた画像と、その OCR 結果（fetch_ndl.sh で作り直せる）
+episodes/*/demo/ndl/
+# 第5弾の OCR を動かす環境（本家を clone して作る。setup.sh で作り直せる）
+episodes/*/demo/ndlocr-lite/
+episodes/*/demo/.venv/
+episodes/*/demo/aozora/

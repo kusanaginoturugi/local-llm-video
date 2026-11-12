@@ -35,6 +35,9 @@ W, H, FPS = 1920, 1080, 30
 SIDE = 440                         # 左右のキャラの列の幅（左右で同じ）
 SLIDE_BOX = (80, 64, W - 80, 812)   # 画面（スライド）を置く範囲。下の角にはキャラが少しかぶる
 SUB_BOX = (SIDE, 828, W - SIDE, 1052)  # 字幕
+TSUMUGI_W = 210                     # 第5弾：字幕の右に、つむぎの立つ場所を空ける
+if episode.NAME == "ep05":
+    SUB_BOX = (SIDE, 828, W - SIDE - TSUMUGI_W, 1052)
 BG = (24, 26, 33)
 PANEL = (40, 43, 54)
 TEXT = (236, 238, 244)
@@ -136,10 +139,14 @@ def screencam_frames(relative_path):
             _cam_tmp = tempfile.TemporaryDirectory(prefix="local-llm-screencam-")
         folder = os.path.join(_cam_tmp.name, str(len(_cam_frames)))
         os.makedirs(folder)
-        crop = "crop=1600:755:0:0" if relative_path.endswith("-tab.mkv") else "crop=1600:755:0:145"
+        # 第4弾のブラウザ録画はページ部分だけを切り出す。第5弾からは録画をそのまま使い、縦横比を保って枠に収める
+        if episode.NAME == "ep04":
+            crop = "crop=1600:755:0:0," if relative_path.endswith("-tab.mkv") else "crop=1600:755:0:145,"
+        else:
+            crop = ""
         subprocess.run([
             "ffmpeg", "-loglevel", "error", "-y", "-i", episode.path(relative_path),
-            "-vf", f"{crop},fps=10", "-q:v", "3",
+            "-vf", f"{crop}fps=10", "-q:v", "3",
             os.path.join(folder, "%04d.jpg"),
         ], check=True)
         files = sorted(os.path.join(folder, name) for name in os.listdir(folder))
@@ -152,7 +159,13 @@ def screencam_frames(relative_path):
 @lru_cache(maxsize=5)
 def screencam_frame(path):
     with Image.open(path) as source:
-        return source.convert("RGB").resize((1585, 748), Image.Resampling.LANCZOS)
+        im = source.convert("RGB")
+    if episode.NAME == "ep04":
+        return im.resize((1585, 748), Image.Resampling.LANCZOS)
+    im.thumbnail((1585, 748), Image.Resampling.LANCZOS)
+    box = Image.new("RGB", (1585, 748), im.getpixel((0, 0)))
+    box.paste(im, ((1585 - im.width) // 2, (748 - im.height) // 2))
+    return box
 
 
 # ---------- 画面（スライド） ----------
@@ -403,15 +416,20 @@ def load_chars():
             f2.alpha_composite(dark)
             dim.append(f2)
         chars[name] = (frames, dim)
-    if episode.NAME == "ep04":
-        # 乱入用のSD絵。頭の大きさを左右の二人にそろえ、中央でタイトルに重ねる。
+    if episode.NAME in ("ep04", "ep05"):
+        # 第4弾は乱入用に大きく、中央でタイトルに重ねる。第5弾は本編にいるので小さく、字幕の箱の上に立たせる
         for mood in ("angry", "happy"):
             source = os.path.join(ROOT, "assets", "official", f"tsumugi-sd-{mood}.png")
             portrait = Image.open(source).convert("RGBA")
             portrait = portrait.crop(portrait.getbbox())
-            height = 600
-            chars[f"つむぎ-{mood}"] = portrait.resize(
-                (round(portrait.width * height / portrait.height), height), Image.LANCZOS)
+            height = 600 if episode.NAME == "ep04" else 240
+            im = portrait.resize((round(portrait.width * height / portrait.height), height), Image.LANCZOS)
+            chars[f"つむぎ-{mood}"] = im
+            dark = Image.new("RGBA", im.size, (0, 0, 0, 0))
+            dark.paste((0, 0, 0, 90), (0, 0), im)
+            dimmed = im.copy()
+            dimmed.alpha_composite(dark)
+            chars[f"つむぎ-{mood}-dim"] = dimmed
     return chars
 
 
@@ -441,6 +459,7 @@ def load_lines():
         direction = {r["no"]: r for r in csv.DictReader(f, delimiter="\t")}
     reacts = {no: d.get("react", "") for no, d in direction.items()}
     lines, spec, slide_start = [], SLIDES[1], 0.0
+    mood = "happy"  # 第5弾のつむぎの表情。つむぎの行の react（angry / happy）で変わり、次に変わるまで続く
     for r in tl:
         no = int(r["no"])
         if no in SLIDES:
@@ -448,12 +467,15 @@ def load_lines():
             slide_start = float(r["start"])
         with open(os.path.join(VOICE, f"{no:03d}_{VOICE_SLUG[r['speaker']]}.json")) as f:
             q = json.load(f)
+        if r["speaker"] == "つむぎ" and reacts.get(r["no"]) in ("angry", "happy"):
+            mood = reacts[r["no"]]
         lines.append({
             "no": no, "speaker": r["speaker"], "text": r["text"],
             "start": float(r["start"]), "end": float(r["end"]),
             "section": sections.get(r["no"], ""), "spec": spec, "slide_start": slide_start,
             "motion": r.get("motion", ""),
             "react": reacts.get(r["no"], ""),
+            "tsumugi": mood,
             "sing": bool(direction.get(r["no"], {}).get("sing")),
             "track": mouth_track(q, float(r["start"])),
         })
@@ -550,6 +572,12 @@ def frame_at(base, line, t, chars, talking=True, state=None):
         im = chars["つむぎ-angry" if angry else "つむぎ-happy"]
         dy = motion_offset(line["motion"], t - line["start"])[1] if line["speaker"] == "つむぎ" else 0
         img.paste(im, ((W - im.width) // 2, 805 - im.height + dy), im)
+    # 第5弾のつむぎは最初から本編にいる。字幕の右の空き（ずんだもんの隣）に立ち、しゃべっていないときは二人と同じく暗くする
+    if episode.NAME == "ep05":
+        speaking = talking and line["speaker"] == "つむぎ"
+        im = chars[f"つむぎ-{line['tsumugi']}" + ("" if speaking or not talking else "-dim")]
+        dy = motion_offset(line["motion"], t - line["start"])[1] if speaking else 0
+        img.paste(im, (SUB_BOX[2] + (TSUMUGI_W - im.width) // 2, H - 8 - im.height + dy), im)
     return img
 
 

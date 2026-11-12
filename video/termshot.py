@@ -69,6 +69,7 @@ def capture(cmd, cols, rows, at, typed, env):
 
 
 def render(screen, path, size=22, keep_rows=None, replace=()):
+    """画面を絵にする。path があれば PNG に保存し、どちらでも絵を返す。"""
     f, fb = ImageFont.truetype(FONT, size), ImageFont.truetype(FONT_BOLD, size)
     cw, ch = round(f.getlength("M")), round(size * 1.25)
     lines = keep_rows or screen.lines
@@ -96,7 +97,9 @@ def render(screen, path, size=22, keep_rows=None, replace=()):
                 d.rectangle((px, py, px + w, py + ch), fill=bg)
             if c.data.strip():
                 d.text((px, py + 2), c.data, font=fb if c.bold else f, fill=fg)
-    img.save(path)
+    if path:
+        img.save(path)
+    return img
 
 
 def main():
