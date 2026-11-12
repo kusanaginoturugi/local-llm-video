@@ -17,3 +17,8 @@ done
 for f in 3009 3013 3015 3016 3017 3019 3020 3021 3022 3030; do
   curl -fL -o official/sd/zunmon_$f.png https://zunko.jp/sozai/zundamon/zunmon_$f.png
 done
+# 第4弾の春日部つむぎ。映像利用可、素材の再配布不可。
+# https://kasukabe294.booth.pm/items/3474402
+curl -fL -o official/tsumugi.webp https://voicevox.hiroshiba.jp/_astro/portrait-kasukabe_tsumugi.BhVWXYsI_jzt5L.webp
+# 第4弾で引用する Preferred Networks の図13。出典を概要欄に記す。
+curl -fL -o official/pfn-figure13.png https://pfn-web-static-contents-kuroco.s3.ap-northeast-1.amazonaws.com/files/a/public/news/press-performance-log-no-lead-comparison.png

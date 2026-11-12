@@ -1,0 +1,2 @@
+# TSV の末尾タブは空の最終列を表す。
+*.tsv whitespace=-blank-at-eol

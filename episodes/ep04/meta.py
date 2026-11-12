@@ -1,0 +1,87 @@
+"""第4弾の概要欄とサムネイル。"""
+
+REPO = "https://github.com/kusanaginoturugi/local-llm-video"
+EXTENSION = "https://github.com/kusanaginoturugi/offline-browser-translate"
+UPSTREAM = "https://github.com/Eldoprano/offline-browser-translate"
+MODEL = "https://huggingface.co/pfnet/plamo-3-translate-0.8b-GGUF"
+QUALITY = "https://www.preferred.jp/ja/blog/tech/plamo-3-translate-weight-release"
+ADDON = "https://addons.mozilla.org/en-GB/firefox/addon/local-llm-translator/"
+
+THUMBNAIL = {
+    "number": 4,
+    "color": (107, 205, 240),
+    "title": "ページ翻訳",
+    "title2": "爆速AI",
+    "pill": ("0.8B", "爆速翻訳"),
+    "metan": "met_s214",
+    "zundamon": "zunmon_3022",
+}
+
+
+def description(chapters):
+    return "\n".join([
+        "『ローカル LLM で遊ぼう』第4弾。Local LLM Translator でページをローカル翻訳し、",
+        "PLaMo 3 Translate 0.8B（GGUF Q4_K_M）の速さをブラウザの実画面で見せます。",
+        "翻訳品質の公式比較と制作者の使用感も紹介します。",
+        "PLaMo と TranslateGemma 12B が同じ自作記事を訳す、拡張の実画面も収録しました。",
+        "Microsoft Learn の日本語版と、英語版を PLaMo で翻訳した実画面も比較します。",
+        "",
+        "■ Microsoft Learn の訳文比較（2026-11-12）",
+        "日本語版: 「コマンドのストリングを助けて。」",
+        "英語原文: Help string for the command.",
+        "英語版を Local LLM Translator + PLaMo 3 Translate 0.8B で翻訳: 「コマンドのヘルプ文字列。」",
+        "実ページでの一例です。短い一文だけを別途 API に送ったときは別の訳になり、常に同じ訳が出る保証はありません。",
+        "日本語版: https://learn.microsoft.com/ja-jp/dotnet/api/microsoft.bot.builder.formflow.commanddescription.help?view=botbuilder-dotnet-3.0",
+        "英語版: https://learn.microsoft.com/en-us/dotnet/api/microsoft.bot.builder.formflow.commanddescription.help?view=botbuilder-dotnet-3.0",
+        "",
+        "■ ブラウザの実画面（2026-11-12）",
+        "同じ英語の自作記事を、Local LLM Translator から日本語に翻訳。RTX 4070 で両モデルとも全層 GPU、キャッシュなし、同時リクエスト1件。",
+        "PLaMo 0.8B は Q4_K_M・Custom 形式、TranslateGemma 12B は Q4_K_M・専用形式。動画のPLaMo実録は等速と4倍スロー、12B実録は等速です。",
+        "Q4_K_M のファイル容量は PLaMo 約0.57 GB、TranslateGemma 12B 約7.3 GB。画面の変化は使用例で、API 実測とは区別しています。",
+        "",
+        "■ 速度の数字と測り方",
+        "API の実測値、生成速度、モデルの小ささが効く理由は解説ページにまとめました。",
+        "https://local-llm-plamo-translate-guide.brownhost.chatgpt.site/",
+        "",
+        "■ 拡張で PLaMo を使う設定",
+        "Provider: LMStudio / OpenAI-compatible、URL: http://127.0.0.1:8000",
+        "Request Format: Custom / User Prompt: {{texts}} / Max Items per Batch: 1 / Use structured JSON output: オフ",
+        "英語→日本語だけなら System Prompt は空欄でも自動判定します。訳す先を固定するなら次の2行を System Prompt に入力:",
+        "[plamo-translate]",
+        "target_lang={{targetCode}}",
+        "拡張のキャッシュを使う場合、体感速度の比較はキャッシュをオフにして行ってください。",
+        "",
+        "■ 目次",
+        *chapters,
+        "",
+        "■ この動画で使ったもの",
+        "PLaMo 3 Translate 0.8B GGUF Q4_K_M / Local LLM Translator / llama.cpp 0.9.0-dev（commit ac931b5）",
+        "ディストリから入れた llama-cpp 0.6.0 では unknown tokenizer: 'plamo3' で読み込めませんでした。",
+        "",
+        "■ リンク",
+        f"Local LLM Translator の上流: {UPSTREAM}",
+        f"使用した fork: {EXTENSION}",
+        f"Firefox アドオン: {ADDON}",
+        f"PLaMo 3 Translate 0.8B GGUF（使い方・ライセンス）: {MODEL}",
+        f"PFN の翻訳品質比較（図13）: {QUALITY}",
+        f"台本・計測スクリプト・実測値: {REPO}/tree/main/episodes/ep04",
+        "",
+        "■ これまでの回",
+        "第1弾：llama-server を立ち上げよう https://youtu.be/3Sk9T1VqNsg",
+        "第2弾：音声入力で Hello, Computer? https://youtu.be/k-ploGYRc_Q",
+        "第3弾：声で会話するローカル AI（シリーズの前回）",
+        "",
+        "■ 制作",
+        "台本・記事・検証・動画の組み立て: Codex GPT-6-Sol",
+        "",
+        "■ クレジット",
+        "音声: VOICEVOX:四国めたん / VOICEVOX:ずんだもん / VOICEVOX:春日部つむぎ",
+        "イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成",
+        "春日部つむぎSD立ち絵: 公式イラストを参考に生成・編集（原案 KASUKABEproject／春日部つくし）",
+        "https://kasukabe294.booth.pm/items/3474402",
+        "BGM: 魔王魂『アコースティック51』 https://maou.audio/bgm_acoustic51/ （CC BY 4.0）",
+        "背景写真: SankalpSasnur『RGB desktop computer setup with keyboard and monitor』（CC0）",
+        "https://commons.wikimedia.org/wiki/File:RGB_desktop_computer_setup_with_keyboard_and_monitor.jpg",
+        "",
+        "#ローカルLLM #PLaMo #翻訳 #ずんだもん #四国めたん #VOICEVOX",
+    ])

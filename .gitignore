@@ -13,5 +13,8 @@ episodes/*/demo/*.log
 __pycache__/
 episodes/*/demo/models/
 
+# Sites は別の Git リポジトリとして管理する
+sites/
+
 # デモ用に VOICEVOX で作った音声（.txt から作り直せる）
 episodes/*/demo/audio/*.wav

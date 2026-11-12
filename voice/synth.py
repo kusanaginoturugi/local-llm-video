@@ -45,6 +45,7 @@ SPEAKERS = {
     "パソコンのめたん": {"slug": "pc_metan", "id": 2, "speedScale": 1.0, "pan": 0.0, "base": "めたん"},
     # 第3弾のデモで voice-chat に話しかける役（冥鳴ひまり）。解説の 2 人と聞き分けやすいよう別の声にし、中央から鳴らす
     "ひまり": {"slug": "himari", "id": 14, "speedScale": 1.0, "pan": 0.0, "sing_id": 3014},
+    "つむぎ": {"slug": "tsumugi", "id": 8, "speedScale": 1.0, "pan": 0.0},
 }
 GAP_SEC = 0.35  # all.wav で行と行の間に入れる無音（direction.tsv の gap で上書き）
 

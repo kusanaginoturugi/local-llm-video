@@ -17,8 +17,17 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
   - 台本: https://claude.ai/artifact/XVRqxtD2fCeVedg1qbSC9c
   - 作った voice-chat: https://github.com/kusanaginoturugi/voice-chat
   - 台本は `episodes/ep03/build_script.py` から script.tsv と screens.tsv を書き出す。デモの返事（「パソコンのずんだもん」などの行）は `demo/run_demos.py` で実際に作った `demo/demos.json` を使う
+- 第4弾：Local LLM Translator と PLaMo 3 Translate 0.8B（`episodes/ep04/`）
+  - 解説ページ: https://local-llm-plamo-translate-guide.brownhost.chatgpt.site/
+  - 台本は `episodes/ep04/build_script.py`、演出は `episodes/ep04/build_direction.py` から生成する
+  - `demo/benchmark.py` で拡張の Custom 設定に近い API リクエストを実測。`demo/results-gpu.json` と `demo/results-cpu.json` が原記録
+  - 動画の速度画面は、拡張で同じ記事を翻訳した `demo/browser-translategemma12b-glow-tab.mkv` と `demo/browser-plamo-glow-tab.mkv` の実録。PLaMo は等速と4倍スローで見せる。両方ともキャッシュをオフにして Translation glow effect を有効にした
+  - `demo/capture_tab.mjs` はブラウザのタブを直接録画する。12B はスクロール開始を8秒遅らせ、PLaMo は2秒後に開始する。12B の llama.cpp に言語を指定するため、録画時だけ `demo/translategemma_proxy.py` を使った
+  - API の実測値と計測条件は `demo/results-gpu.json` と解説ページにまとめる。ブラウザの実録は体感用
+  - 拡張の PLaMo 設定と実測条件は `episodes/ep04/notes.md` を参照
+  - つむぎの乱入は公式イラストを参考にしたSD絵の怒り・笑顔差分を中央に表示する。画像は再配布せず、ローカルの `assets/official/tsumugi-sd-angry.png` と `assets/official/tsumugi-sd-happy.png` に置く
 
-台本・記事・検証・動画の組み立ては Claude Code、画面の撮影は Claude in Chrome で行いました。
+第1〜3弾の制作には Claude Code、画面の撮影には Claude in Chrome を使用しました。第4弾の台本・記事・検証・動画の組み立てには Codex GPT-6-Sol を使用しました。
 
 ## 構成
 
@@ -82,8 +91,9 @@ VOICEVOX 本体のユーザー辞書は変更しません。英字の語は単�
 
 次のものは、それぞれの規約に従ってください。
 
-- 音声：VOICEVOX で合成した四国めたん・ずんだもんの音声は、[VOICEVOX 利用規約](https://voicevox.hiroshiba.jp/term/)と[音源利用規約](https://zunko.jp/con_ongen_kiyaku.html)に従います。公開時はクレジット表記「VOICEVOX:四国めたん」「VOICEVOX:ずんだもん」が必要です。
+- 音声：VOICEVOX で合成した四国めたん・ずんだもん・春日部つむぎの音声は、[VOICEVOX 利用規約](https://voicevox.hiroshiba.jp/term/)と各音源の利用規約に従います。公開時はクレジット表記「VOICEVOX:四国めたん」「VOICEVOX:ずんだもん」「VOICEVOX:春日部つむぎ」が必要です。
 - イラスト：四国めたん・ずんだもんのイラストは[東北ずん子・ずんだもんプロジェクト](https://zunko.jp/)の公式素材です。[キャラクター利用ガイドライン](https://zunko.jp/guideline.html)に従ってください。再配布を避けるため、画像そのものと口パク差分はリポジトリに含めていません。
+- 春日部つむぎ：第4弾のSD絵は[KASUKABEproject の公式立ち絵](https://kasukabe294.booth.pm/items/3474402)を参考に生成・編集したものです。画像はリポジトリに含めず、動画に使用します。
 - スクリーンショット：`episodes/ep01/slides/hf-*.png` と `episodes/ep02/slides/hf-whisper-files.png` は Hugging Face の画面、`episodes/ep02/slides/voxtype-github.png` は GitHub の画面です。
 - BGM：[魔王魂](https://maou.audio/)「[アコースティック51](https://maou.audio/bgm_acoustic51/)」（CC BY 4.0）。公開時はクレジット表記「BGM：魔王魂」が必要です。リポジトリには曲ファイルを含めていません。
 - 背景写真：SankalpSasnur「[RGB desktop computer setup with keyboard and monitor](https://commons.wikimedia.org/wiki/File:RGB_desktop_computer_setup_with_keyboard_and_monitor.jpg)」（CC0、Wikimedia Commons）。

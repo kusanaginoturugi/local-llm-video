@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A small model for a big reading list</title>
+  <style>
+    :root{font-family:Georgia,serif;color:#233045;background:#f6f4ee}*{box-sizing:border-box}body{margin:0}header{background:#123b4a;color:white;padding:13px 5%;font:700 12px Arial,sans-serif;letter-spacing:.15em}main{max-width:1280px;margin:28px auto;padding:0 32px}.label{color:#a4532d;font:700 11px Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase}h1{font-size:42px;line-height:1.12;margin:12px 0 18px}h2{font-size:24px;margin:32px 0 10px}p{font-size:17px;line-height:1.55;color:#344052;margin:10px 0}.intro{font-size:19px;color:#203446}.rule{height:4px;width:75px;background:#d07842;margin:22px 0}.footer{border-top:1px solid #c8ccc5;padding:28px 0;margin-top:60px;color:#69716d;font:14px Arial,sans-serif}#llm-translator-status{top:235px!important;bottom:auto!important;right:26px!important;font-size:13px!important;padding:8px 12px!important;max-width:290px!important;line-height:1.3!important}
+  </style>
+</head>
+<body>
+  <header>THE LOCAL READING ROOM</header>
+  <main>
+    <div class="label">Technology · Language · Privacy</div>
+    <h1>A small model for a big reading list</h1>
+    <p class="intro">What if your browser could translate a page without sending its text to a cloud translation service?</p>
+    <div class="rule"></div>
+    <h2>Translation on your own computer</h2>
+    <p>A browser extension can collect the visible text and send it to a language model running on your computer. The translated sentences then replace the original text on the page.</p>
+    <p>This approach is useful when you want to read an article in another language while keeping the translation request local. Opening the original website still requires a network connection.</p>
+    <h2>Speed is only part of the story</h2>
+    <p>A tiny model can return short translations quickly, but the quality of each sentence matters. Names, idioms, and unusual expressions deserve a second look.</p>
+    <p>Imagine reading a long technical article on a train. You want to follow the main argument first, then check specific terms when something seems unclear. A good translation tool should help you move through the page without losing the structure of the original article.</p>
+    <p>Some sentences are easy to translate in isolation. Others depend on context from the previous paragraph. A model may choose a word that sounds natural but changes the meaning of a technical term. It is useful to keep the original nearby so you can compare the two when needed.</p>
+    <h2>How the browser extension works</h2>
+    <p>When you press the translate button, the extension finds headings and visible paragraphs on the page. It sends the text to a model through an API on the same computer. The response is placed back into the document, so the page becomes readable in the selected language.</p>
+    <p>The extension can keep working as you scroll. This matters because many modern websites load more content only when it comes into view. A translator that handles only the first screen would leave the rest of the article untouched.</p>
+    <p>Translation requests can also be cached. If the same sentence appears again, the extension may reuse its earlier answer instead of asking the model twice. That can make a familiar page feel even faster, but it should be disabled when measuring the model's raw speed.</p>
+    <h2>What to check in a real test</h2>
+    <p>Look at both the time and the result. A very fast translation is not helpful when it misses a name, invents a detail, or turns an idiom into a literal phrase. Read a few complete paragraphs rather than judging the model from one short example.</p>
+    <p>Try pages with different layouts, such as a blog post, documentation, and a discussion thread. Headings, lists, and short labels can behave differently from ordinary paragraphs. The best setting for one site may not be the best setting for another.</p>
+    <p>Finally, distinguish the model's response time from the time it takes to finish an entire page. The browser must find text, divide it into requests, receive answers, and replace elements on screen. The total experience includes all of those steps.</p>
+    <h2>A practical reading habit</h2>
+    <p>Start with a quick local translation to understand the topic. If a sentence is important, compare it with the original. When a name or product term is translated inconsistently, add it to a glossary and try again.</p>
+    <p>Small local models make this workflow easy to try on an ordinary computer. Their low memory use leaves room for the browser and other applications. The right choice depends on the languages you read, the hardware you have, and how much accuracy the task requires.</p>
+    <h2>Keeping the original close at hand</h2>
+    <p>A translation is most useful when the reader can still find the sentence that produced it. A familiar page layout helps you compare a translated paragraph with its source without opening a second document.</p>
+    <p>When an unfamiliar term appears, pause and read the surrounding sentences. The same English word can refer to a device, a process, or an everyday object depending on the topic.</p>
+    <p>Short headings are especially difficult because they provide little context. A model may choose a fluent Japanese phrase that sounds plausible while missing the author's intended meaning.</p>
+    <p>Names of people, software projects, and institutions should usually remain recognizable. A glossary can protect those names and make repeated terms consistent across a long page.</p>
+    <p>Numbers and units also deserve attention. Even a well-written translation can be misleading if a date, a measurement, or a version number changes along the way.</p>
+    <h2>Reading a longer technical guide</h2>
+    <p>Consider a guide that begins with a short overview and then moves through installation, configuration, examples, and troubleshooting. A reader may want the overview first, but later sections are still important.</p>
+    <p>The browser does not need to replace every word at the same instant. It can work through the visible paragraphs and continue with the rest of the document while you read.</p>
+    <p>As the page grows longer, the order of translation becomes easier to notice. Headings and nearby text change first, while paragraphs farther down the page wait their turn.</p>
+    <p>Scrolling through the document can change which text is most useful right now. A responsive extension can prioritize the region the reader is looking at without losing the remaining work.</p>
+    <p>The translation process should keep the article readable throughout. A paragraph that has not been translated yet should remain visible in the source language instead of disappearing.</p>
+    <h2>Where the time goes</h2>
+    <p>Each request has several steps. The extension gathers text, sends it to the local server, waits for a reply, interprets that reply, and updates the page.</p>
+    <p>The model itself must read the prompt and generate a translated answer. A compact model can often do that work with less memory traffic and fewer calculations than a much larger model.</p>
+    <p>Small requests may finish quickly, yet a complete article contains many requests. The total time depends on the number of text elements, the length of each one, and whether requests run together.</p>
+    <p>A warm model responds differently from one that still needs to load its weights. A fair measurement states whether the loading time was included and whether a cache was enabled.</p>
+    <p>Visual progress matters too. Seeing nearby paragraphs change steadily tells the reader that the system is working, even before the whole page is complete.</p>
+    <h2>Questions worth asking about quality</h2>
+    <p>Does the translated heading match the subject of the paragraph below it? Does a technical term keep the same meaning when it appears again in a later section?</p>
+    <p>Are the instructions still in the right order? A translation that sounds smooth but reverses a warning or an action could lead the reader in the wrong direction.</p>
+    <p>Does the model preserve the difference between an observation and a recommendation? Words such as may, should, and must carry different levels of certainty.</p>
+    <p>What happens to code, file paths, and command names? Those pieces of text often need to stay unchanged so that readers can follow the original instructions.</p>
+    <p>When the answer is uncertain, compare the original sentence with another translation or ask a person who knows the subject. Local translation is a reading aid, not a substitute for checking important details.</p>
+    <h2>A workflow for everyday reading</h2>
+    <p>Begin with the part of the page that answers your immediate question. Let the translator handle the nearby text while you decide whether the article is useful.</p>
+    <p>If the article deserves a closer read, move through its sections at your own pace. The translation can continue in the background as new paragraphs come into view.</p>
+    <p>Keep a short list of names and terms that must not change. Add those to a glossary before translating several related pages about the same project.</p>
+    <p>For unfamiliar claims, follow the links to original sources. The browser extension helps you read them, but evidence still comes from the documents themselves.</p>
+    <p>At the end, return to the few sentences that matter most and check them carefully. The fastest translation is valuable when it gives you more time for that deliberate reading.</p>
+    <div class="footer">Demo article written for Local LLM Translator episode 4.</div>
+  </main>
+</body>
+</html>

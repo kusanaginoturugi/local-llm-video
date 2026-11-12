@@ -15,6 +15,8 @@ import math
 import os
 import subprocess
 import sys
+import tempfile
+from functools import lru_cache
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -39,10 +41,12 @@ TEXT = (236, 238, 244)
 MUTED = (150, 156, 172)
 HL = (255, 214, 102)
 COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70),
-         "パソコンのめたん": (234, 96, 160), "パソコンのずんだもん": (110, 190, 70), "ひまり": (150, 140, 230)}
+         "パソコンのめたん": (234, 96, 160), "パソコンのずんだもん": (110, 190, 70),
+         "ひまり": (150, 140, 230), "つむぎ": (235, 173, 80)}
 SLUG = {"めたん": "metan", "ずんだもん": "zundamon"}
 # 音声ファイルの名前。「パソコンの〜」は第3弾のデモで返事をする voice-chat のキャラ（立ち絵は動かさない）
-VOICE_SLUG = {**SLUG, "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon", "ひまり": "himari"}
+VOICE_SLUG = {**SLUG, "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon",
+              "ひまり": "himari", "つむぎ": "tsumugi"}
 FADE = 0.4  # 章の変わり目で、見出しの前後をフェードでつなぐ秒数
 ANNOTATE_ONCE = True  # False にすると、用語が出るたびに毎回読みを添える
 BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔王魂「アコースティック51」ループ版
@@ -63,6 +67,8 @@ JP_BOLD = "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"
 MONO = "/usr/share/fonts/TTF/Cica-Regular.ttf"
 EMOJI = "/usr/share/fonts/noto/NotoColorEmoji.ttf"  # カラー絵文字（109px のビットマップだけを持つ）
 _fonts = {}
+_cam_frames = {}
+_cam_tmp = None
 
 
 def font(path, size):
@@ -122,9 +128,36 @@ def fit_font(lines, path, start, width, mono=False):
     return font(path, size)
 
 
+def screencam_frames(relative_path):
+    """実録のページ部分を一時 JPEG に展開して、動画のフレームに合わせる。"""
+    global _cam_tmp
+    if relative_path not in _cam_frames:
+        if _cam_tmp is None:
+            _cam_tmp = tempfile.TemporaryDirectory(prefix="local-llm-screencam-")
+        folder = os.path.join(_cam_tmp.name, str(len(_cam_frames)))
+        os.makedirs(folder)
+        crop = "crop=1600:755:0:0" if relative_path.endswith("-tab.mkv") else "crop=1600:755:0:145"
+        subprocess.run([
+            "ffmpeg", "-loglevel", "error", "-y", "-i", episode.path(relative_path),
+            "-vf", f"{crop},fps=10", "-q:v", "3",
+            os.path.join(folder, "%04d.jpg"),
+        ], check=True)
+        files = sorted(os.path.join(folder, name) for name in os.listdir(folder))
+        if not files:
+            raise RuntimeError(f"スクリーンカムからフレームを読めません: {relative_path}")
+        _cam_frames[relative_path] = files
+    return _cam_frames[relative_path]
+
+
+@lru_cache(maxsize=5)
+def screencam_frame(path):
+    with Image.open(path) as source:
+        return source.convert("RGB").resize((1585, 748), Image.Resampling.LANCZOS)
+
+
 # ---------- 画面（スライド） ----------
 
-def draw_slide(img, spec, section):
+def draw_slide(img, spec, section, elapsed=0):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = SLIDE_BOX
     if section:
@@ -135,6 +168,15 @@ def draw_slide(img, spec, section):
         r = min((x1 - x0) / im.width, (y1 - y0) / im.height)
         im = im.resize((int(im.width * r), int(im.height * r)), Image.LANCZOS)
         img.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0 + (y1 - y0 - im.height) // 2))
+    elif kind == "screencam":
+        _, path, label, speed, source_start = spec
+        frames = screencam_frames(path)
+        index = min(int(max(0, source_start + elapsed * speed) * 10), len(frames) - 1)
+        frame = screencam_frame(frames[index]).resize((1458, 688), Image.Resampling.LANCZOS)
+        img.paste(frame, (x0 + (x1 - x0 - frame.width) // 2, y0 + 60))
+        # ラベルは録画の外。翻訳の進捗表示や本文を隠さない。
+        d.rounded_rectangle((x0 + 20, y0 + 4, x1 - 20, y0 + 54), 12, fill=(16, 17, 22))
+        d.text((x0 + 45, y0 + 13), label, font=font(JP_BOLD, 27), fill=TEXT)
     elif kind == "title":
         _, main, sub = spec
         f = fit_font([main], JP_BOLD, 96, x1 - x0)
@@ -361,6 +403,15 @@ def load_chars():
             f2.alpha_composite(dark)
             dim.append(f2)
         chars[name] = (frames, dim)
+    if episode.NAME == "ep04":
+        # 乱入用のSD絵。頭の大きさを左右の二人にそろえ、中央でタイトルに重ねる。
+        for mood in ("angry", "happy"):
+            source = os.path.join(ROOT, "assets", "official", f"tsumugi-sd-{mood}.png")
+            portrait = Image.open(source).convert("RGBA")
+            portrait = portrait.crop(portrait.getbbox())
+            height = 600
+            chars[f"つむぎ-{mood}"] = portrait.resize(
+                (round(portrait.width * height / portrait.height), height), Image.LANCZOS)
     return chars
 
 
@@ -389,16 +440,19 @@ def load_lines():
     with open(episode.path("direction.tsv"), newline="") as f:
         direction = {r["no"]: r for r in csv.DictReader(f, delimiter="\t")}
     reacts = {no: d.get("react", "") for no, d in direction.items()}
-    lines, spec = [], SLIDES[1]
+    lines, spec, slide_start = [], SLIDES[1], 0.0
     for r in tl:
         no = int(r["no"])
-        spec = SLIDES.get(no, spec)
+        if no in SLIDES:
+            spec = SLIDES[no]
+            slide_start = float(r["start"])
         with open(os.path.join(VOICE, f"{no:03d}_{VOICE_SLUG[r['speaker']]}.json")) as f:
             q = json.load(f)
         lines.append({
             "no": no, "speaker": r["speaker"], "text": r["text"],
             "start": float(r["start"]), "end": float(r["end"]),
-            "section": sections.get(r["no"], ""), "spec": spec, "motion": r.get("motion", ""),
+            "section": sections.get(r["no"], ""), "spec": spec, "slide_start": slide_start,
+            "motion": r.get("motion", ""),
             "react": reacts.get(r["no"], ""),
             "sing": bool(direction.get(r["no"], {}).get("sing")),
             "track": mouth_track(q, float(r["start"])),
@@ -435,9 +489,9 @@ def background():
     return _background
 
 
-def base_frame(line):
+def base_frame(line, t=None):
     img = background().copy()
-    draw_slide(img, line["spec"], line["section"])
+    draw_slide(img, line["spec"], line["section"], 0 if t is None else t - line["slide_start"])
     draw_subtitle(img, line["speaker"], line["subtitle"])
     return img
 
@@ -489,6 +543,13 @@ def frame_at(base, line, t, chars, talking=True, state=None):
             im = im.resize((round(im.width * scale), round(im.height * scale)), Image.BILINEAR)
         x, y = char_pos(name, im)
         img.paste(im, (x + dx, y + dy), im)
+    # 第4弾のつむぎは二人の間へ割り込み、タイトルを隠す。
+    # 79行は締めの直後に出すので、次の章の見出しで予告しない。
+    if episode.NAME == "ep04" and (3 <= line["no"] <= 8 or 79 <= line["no"] <= 83):
+        angry = line["no"] in (3, 4, 5, 6, 7, 79, 80, 81, 82)
+        im = chars["つむぎ-angry" if angry else "つむぎ-happy"]
+        dy = motion_offset(line["motion"], t - line["start"])[1] if line["speaker"] == "つむぎ" else 0
+        img.paste(im, ((W - im.width) // 2, 805 - im.height + dy), im)
     return img
 
 
@@ -585,7 +646,7 @@ def main():
     if args.still:
         ln = next(l for l in lines if l["no"] == args.still)
         t = ln["start"] + (ln["end"] - ln["start"]) / 3
-        frame_at(base_frame(ln), ln, t, chars).save(os.path.join(OUT, f"still_{args.still:03d}.png"))
+        frame_at(base_frame(ln, t), ln, t, chars).save(os.path.join(OUT, f"still_{args.still:03d}.png"))
         return
 
     print(write_description(lines))
@@ -622,8 +683,8 @@ def main():
         while li + 1 < len(lines) and t >= lines[li + 1]["start"]:
             li += 1
             base = None
-        if base is None:
-            base = base_frame(lines[li])
+        if base is None or lines[li]["spec"][0] == "screencam":
+            base = base_frame(lines[li], t)
         nxt = lines[li + 1] if li + 1 < len(lines) else None
         # 次の行で新しいセクションが始まり、間が 1 秒以上あるなら、間のあいだ見出しを出す
         if (nxt and nxt["section"] != lines[li]["section"] and t >= lines[li]["end"] + 0.2
@@ -646,7 +707,7 @@ def main():
                 prev_bytes = frame_at(bg, lines[li], t, chars, talking=False).tobytes()
         else:
             state = speaker_state(lines[li], t)
-            key = (li, state)
+            key = (li, state, i if lines[li]["spec"][0] == "screencam" else 0)
             # 口の開き・位置・拡大率が前のコマと同じなら、組み立て直さずに使い回す
             if key != prev_key:
                 prev_bytes = frame_at(base, lines[li], t, chars, state=state).tobytes()

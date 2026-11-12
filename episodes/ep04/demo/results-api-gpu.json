@@ -1,0 +1,55 @@
+{
+  "warmup_runs": 1,
+  "measured_runs": 5,
+  "median_wall_seconds": 0.036,
+  "runs": [
+    {
+      "run": 1,
+      "source": "The meeting has been rescheduled for next Monday. Please update the project dashboard before noon.",
+      "wall_seconds": 0.057,
+      "translation": "会議は来週の月曜日に変更となりました。正午までにプロジェクトダッシュボードを更新してください。",
+      "output_tokens": 15,
+      "predicted_tokens_per_second": 478.6652078774616
+    },
+    {
+      "run": 2,
+      "source": "The package arrived this morning, but one of the cables was missing from the box.",
+      "wall_seconds": 0.037,
+      "translation": "今朝荷物が届いたのですが、箱からケーブルが1本なくなっていました。",
+      "output_tokens": 14,
+      "predicted_tokens_per_second": 472.28075274286135
+    },
+    {
+      "run": 3,
+      "source": "You can save the file locally and continue editing even when the network is unavailable.",
+      "wall_seconds": 0.034,
+      "translation": "ファイルをローカルに保存しておけば、ネットワークが利用できない場合でも編集を続けられます。",
+      "output_tokens": 13,
+      "predicted_tokens_per_second": 484.0075827854636
+    },
+    {
+      "run": 4,
+      "source": "Please check the numbers in the report before sharing it with the rest of the team.",
+      "wall_seconds": 0.036,
+      "translation": "チームの他のメンバーに共有する前に、レポート内の数値を確認してください。",
+      "output_tokens": 14,
+      "predicted_tokens_per_second": 483.72093023255815
+    },
+    {
+      "run": 5,
+      "source": "The train was delayed by heavy rain, so we decided to meet at the station cafe.",
+      "wall_seconds": 0.036,
+      "translation": "大雨で電車が遅れたので、駅のカフェで待ち合わせることにした。",
+      "output_tokens": 14,
+      "predicted_tokens_per_second": 478.962493552428
+    },
+    {
+      "run": 6,
+      "source": "If the translation sounds unnatural, select that sentence and try translating it again.",
+      "wall_seconds": 0.033,
+      "translation": "翻訳が不自然な場合は、その文を選択して、もう一度翻訳してみてください。",
+      "output_tokens": 13,
+      "predicted_tokens_per_second": 491.96457855034436
+    }
+  ]
+}

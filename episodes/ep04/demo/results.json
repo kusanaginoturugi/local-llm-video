@@ -1,0 +1,61 @@
+{
+  "warmup_runs": 1,
+  "measured_runs": 5,
+  "median_wall_seconds": 0.046,
+  "runs": [
+    {
+      "run": 1,
+      "source": "The meeting has been rescheduled for next Monday. Please update the project dashboard before noon.",
+      "wall_seconds": 0.072,
+      "raw_response": "[0]: 会議は来週の月曜日に変更となりました。正午までにプロジェクトダッシュボードを更新してください。",
+      "translation": "会議は来週の月曜日に変更となりました。正午までにプロジェクトダッシュボードを更新してください。",
+      "output_tokens": 20,
+      "predicted_tokens_per_second": 507.3024857821803
+    },
+    {
+      "run": 2,
+      "source": "The package arrived this morning, but one of the cables was missing from the box.",
+      "wall_seconds": 0.048,
+      "raw_response": "[0]: 今朝荷物が届いたのですが、箱からケーブルが1本なくなっていました。",
+      "translation": "今朝荷物が届いたのですが、箱からケーブルが1本なくなっていました。",
+      "output_tokens": 19,
+      "predicted_tokens_per_second": 517.8365937859609
+    },
+    {
+      "run": 3,
+      "source": "You can save the file locally and continue editing even when the network is unavailable.",
+      "wall_seconds": 0.047,
+      "raw_response": "[0]: ファイルをローカルに保存し、ネットワークが利用できない場合でも編集を続けることができます。",
+      "translation": "ファイルをローカルに保存し、ネットワークが利用できない場合でも編集を続けることができます。",
+      "output_tokens": 18,
+      "predicted_tokens_per_second": 505.36579565385415
+    },
+    {
+      "run": 4,
+      "source": "Please check the numbers in the report before sharing it with the rest of the team.",
+      "wall_seconds": 0.046,
+      "raw_response": "[0]: チームの他のメンバーと共有する前に、レポート内の数値を確認してください。",
+      "translation": "チームの他のメンバーと共有する前に、レポート内の数値を確認してください。",
+      "output_tokens": 19,
+      "predicted_tokens_per_second": 516.6475315729047
+    },
+    {
+      "run": 5,
+      "source": "The train was delayed by heavy rain, so we decided to meet at the station cafe.",
+      "wall_seconds": 0.046,
+      "raw_response": "[0]: 大雨で電車が遅れたので、駅のカフェで待ち合わせることにした。",
+      "translation": "大雨で電車が遅れたので、駅のカフェで待ち合わせることにした。",
+      "output_tokens": 19,
+      "predicted_tokens_per_second": 512.280502034892
+    },
+    {
+      "run": 6,
+      "source": "If the translation sounds unnatural, select that sentence and try translating it again.",
+      "wall_seconds": 0.044,
+      "raw_response": "[0]: 翻訳が不自然な場合は、その文を選択して再度翻訳してみてください。",
+      "translation": "翻訳が不自然な場合は、その文を選択して再度翻訳してみてください。",
+      "output_tokens": 17,
+      "predicted_tokens_per_second": 515.2315321697688
+    }
+  ]
+}
