@@ -59,7 +59,7 @@ def description(chapters):
         "第1弾：llama-server を立ち上げよう https://youtu.be/3Sk9T1VqNsg",
         "第2弾：音声入力で Hello, Computer? https://youtu.be/k-ploGYRc_Q",
         "第3弾：声で会話するローカル AI",
-        "第4弾：0.8B で爆速ページ翻訳（シリーズの前回）",
+        "第4弾：0.8B で爆速ページ翻訳 https://youtu.be/TUADm3MbcKE",
         "",
         "■ 制作",
         "台本・記事・検証・動画の組み立て: Claude Code（Claude Opus 5.5）",

@@ -18,6 +18,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
   - 作った voice-chat: https://github.com/kusanaginoturugi/voice-chat
   - 台本は `episodes/ep03/build_script.py` から script.tsv と screens.tsv を書き出す。デモの返事（「パソコンのずんだもん」などの行）は `demo/run_demos.py` で実際に作った `demo/demos.json` を使う
 - 第4弾：Local LLM Translator と PLaMo 3 Translate 0.8B（`episodes/ep04/`）
+  - 動画: https://youtu.be/TUADm3MbcKE
   - 解説ページ: https://local-llm-plamo-translate-guide.brownhost.chatgpt.site/
   - 台本は `episodes/ep04/build_script.py`、演出は `episodes/ep04/build_direction.py` から生成する
   - `demo/benchmark.py` で拡張の Custom 設定に近い API リクエストを実測。`demo/results-gpu.json` と `demo/results-cpu.json` が原記録

@@ -7,7 +7,7 @@
 - サムネイル：`out/video/thumbnail.png`
 - 概要欄：`out/video/description.txt`（`meta.py` から生成）
 - 日本語字幕：`out/video/subtitles.srt`（台本 106 行、字幕の区切り 107 個）
-- 解説記事：<https://claude.ai/artifact/QaLfsP48pZJ9tTHoK1QNLQ>（ソースは `article.html`）。いまは非公開なので、公開前に記事の共有メニューで「リンクを知っている全員」にする
+- 解説記事：<https://claude.ai/artifact/QaLfsP48pZJ9tTHoK1QNLQ>（ソースは `article.html`）。公開済み
 
 ## 確認済み
 
@@ -18,5 +18,5 @@
 
 ## 公開前にやること
 
-- 解説記事を共有（上記）。
-- 第4弾の YouTube の URL が決まっていれば、`meta.py` の「これまでの回」と README に入れる。
+- 解説記事の公開、第4弾の URL、抜き取りの判定表の確認は済み（2026-11-13）。
+- リリースしたら、第5弾の YouTube の URL を README に入れる。
