@@ -111,6 +111,7 @@ VOICEVOX 本体のユーザー辞書は変更しません。英字の語は単�
 
 - 音声：VOICEVOX で合成した四国めたん・ずんだもん・春日部つむぎの音声は、[VOICEVOX 利用規約](https://voicevox.hiroshiba.jp/term/)と各音源の利用規約に従います。公開時はクレジット表記「VOICEVOX:四国めたん」「VOICEVOX:ずんだもん」「VOICEVOX:春日部つむぎ」が必要です。
 - イラスト：四国めたん・ずんだもんのイラストは[東北ずん子・ずんだもんプロジェクト](https://zunko.jp/)の公式素材です。[キャラクター利用ガイドライン](https://zunko.jp/guideline.html)に従ってください。再配布を避けるため、画像そのものと口パク差分はリポジトリに含めていません。
+- Live2D モデル：四国めたん・ずんだもん（坂本アヒル式）は[東北ずん子・ずんだもんプロジェクト公式ショップ](https://shop.zunko.jp/)で購入したものです。ローカルの `assets/live2d/` に置き、リポジトリには含めません。
 - 春日部つむぎ：第4弾のSD絵は[KASUKABEproject の公式立ち絵](https://kasukabe294.booth.pm/items/3474402)を参考に生成・編集したものです。画像はリポジトリに含めず、動画に使用します。
 - スクリーンショット：`episodes/ep01/slides/hf-*.png` と `episodes/ep02/slides/hf-whisper-files.png` は Hugging Face の画面、`episodes/ep02/slides/voxtype-github.png` は GitHub の画面です。
 - BGM：[魔王魂](https://maou.audio/)「[アコースティック51](https://maou.audio/bgm_acoustic51/)」（CC BY 4.0）。公開時はクレジット表記「BGM：魔王魂」が必要です。リポジトリには曲ファイルを含めていません。
