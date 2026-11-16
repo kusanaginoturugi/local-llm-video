@@ -666,6 +666,14 @@ def frame_at(base, line, t, chars, talking=True, state=None, l2d=None):
         speaking = talking and line["speaker"] == "つむぎ"
         im = chars[f"つむぎ-{line['tsumugi']}" + ("" if speaking or not talking else "-dim")]
         dy = motion_offset(line["motion"], t - line["start"])[1] if speaking else 0
+        if LIVE2D:
+            # 第7弾から：2 人が Live2D で動くので、つむぎの SD 絵も止まって見えないようにする。
+            # いつもゆっくり上下（呼吸、3.2 秒で 1 往復）し、しゃべるときは 2 人と同じく弾んで跳ねる
+            if speaking:
+                _, _, dy, scale = state or speaker_state(line, t)
+                if scale != 1.0:
+                    im = im.resize((round(im.width * scale), round(im.height * scale)), Image.BILINEAR)
+            dy += round(3 * math.sin(2 * math.pi * t / 3.2))
         img.paste(im, (SUB_BOX[2] + (TSUMUGI_W - im.width) // 2, H - 8 - im.height + dy), im)
     return img
 
