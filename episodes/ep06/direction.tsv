@@ -1,7 +1,7 @@
 no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 1	めたん					met_s222			
 2	ずんだもん					zunmon_3015			
-3	つむぎ					happy			
+3	つむぎ					happy	死んだ目=しんだめ		
 4	めたん					met_s222			
 5	ずんだもん					zunmon_3030			
 6	めたん			2.4					
@@ -49,8 +49,8 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 48	つむぎ				shake	angry			
 49	めたん						I=アイ		
 50	めたん								
-51	めたん								
-52	ずんだもん								
+51	めたん						行=ギョウ		
+52	ずんだもん						行=ギョウ		
 53	めたん					met_s222			
 54	つむぎ			0.4					
 55	めたん								
