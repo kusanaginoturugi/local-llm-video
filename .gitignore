@@ -4,6 +4,8 @@ assets/chars/
 
 # 公式ショップで買った Live2D モデル（坂本アヒル式。再配布しない。zip と展開したもの）
 assets/live2d/
+# Live2D を動かす Python の環境（README の「Live2D」で作る）
+.venv-live2d/
 
 # 生成物（スクリプトで作り直せる）
 assets/bgm/

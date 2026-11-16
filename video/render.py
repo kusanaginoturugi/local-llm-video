@@ -39,6 +39,10 @@ TSUMUGI_W = 210                     # 第5弾から：字幕の右に、つむ�
 TSUMUGI_REGULAR = int(episode.NAME[2:]) >= 5  # つむぎは第5弾から本編のレギュラー
 if TSUMUGI_REGULAR:
     SUB_BOX = (SIDE, 828, W - SIDE - TSUMUGI_W, 1052)
+# 第7弾から、めたんとずんだもんは Live2D（公式ショップの坂本アヒル式）で動かす。つむぎは SD 絵のまま。
+# direction.tsv の react には、SD 絵の名前の代わりに Live2D の表情・モーションの名前を + でつないで書く（例 exp_sad+mtnFace_sad）
+LIVE2D = int(episode.NAME[2:]) >= 7
+LIVE2D_PY = os.path.join(ROOT, ".venv-live2d", "bin", "python")
 BG = (24, 26, 33)
 PANEL = (40, 43, 54)
 TEXT = (236, 238, 244)
@@ -405,9 +409,62 @@ def mouth_track(query, start):
     return track
 
 
+def check_live2d_react(no, speaker, react):
+    """Live2D の回の react が、モデルにある表情・モーションの名前か確かめる。SD 絵の名前のままだと止める。"""
+    import live2d_frames
+    exps, motions = live2d_frames.model_vocab(SLUG[speaker])
+    bad = [n for n in react.split("+") if n not in exps | motions]
+    if bad:
+        raise SystemExit(f"{no} 行（{speaker}）の react {'+'.join(bad)} は Live2D モデルにありません。\n"
+                         f"表情: {' '.join(sorted(exps))}\nモーション: {' '.join(sorted(motions))}")
+
+
+class Live2DStream:
+    """video/live2d_frames.py を立ち上げ、めたんとずんだもんの絵を 1 コマずつ受け取る。"""
+
+    def __init__(self, lines, start, count):
+        if not os.path.exists(LIVE2D_PY):
+            raise SystemExit("第7弾からは Live2D を使います。README の「Live2D」の手順で .venv-live2d を作ってください")
+        plan = {"fps": FPS, "start": start, "count": count, "lines": [
+            {"slug": SLUG[l["speaker"]], "start": l["start"], "end": l["end"],
+             "wav": os.path.join(VOICE, f"{l['no']:03d}_{SLUG[l['speaker']]}.wav"),
+             "react": l["react"].split("+") if l["react"] else []}
+            for l in lines if l["speaker"] in SLUG]}
+        self.plan = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        json.dump(plan, self.plan)
+        self.plan.close()
+        self.proc = subprocess.Popen([LIVE2D_PY, os.path.join(ROOT, "video", "live2d_frames.py"), self.plan.name],
+                                     stdout=subprocess.PIPE)
+        sizes = json.loads(self.proc.stdout.readline())
+        self.sizes = [(name, tuple(sizes[slug])) for name, slug in SLUG.items()]
+
+    def next(self):
+        frame = {}
+        for name, (w, h) in self.sizes:
+            buf = self.proc.stdout.read(w * h * 4)
+            if len(buf) != w * h * 4:
+                raise SystemExit("Live2D の絵が途中で切れました（live2d_frames.py のエラーを見てください）")
+            frame[name] = Image.frombytes("RGBA", (w, h), buf)
+        return frame
+
+    def close(self):
+        self.proc.stdout.close()
+        self.proc.wait()
+        os.unlink(self.plan.name)
+
+
+def dimmed(im):
+    """しゃべっていないキャラを暗くする。"""
+    dark = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    dark.paste((0, 0, 0, 90), (0, 0), im)
+    out = im.copy()
+    out.alpha_composite(dark)
+    return out
+
+
 def load_chars():
     chars = {}
-    for name, slug in SLUG.items():
+    for name, slug in ({} if LIVE2D else SLUG).items():
         frames = [bust(Image.open(os.path.join(CHARS, f"{slug}_{i}.png")).convert("RGBA"), slug) for i in range(3)]
         dim = []
         for fr in frames:
@@ -470,6 +527,8 @@ def load_lines():
             q = json.load(f)
         if r["speaker"] == "つむぎ" and reacts.get(r["no"]) in ("angry", "happy"):
             mood = reacts[r["no"]]
+        if LIVE2D and r["speaker"] in SLUG and reacts.get(r["no"]):
+            check_live2d_react(no, r["speaker"], reacts[r["no"]])
         lines.append({
             "no": no, "speaker": r["speaker"], "text": r["text"],
             "start": float(r["start"]), "end": float(r["end"]),
@@ -541,7 +600,7 @@ def speaker_state(line, t):
             level = lv
             break
     dx, dy, scale = 0, 0, 1.0
-    if line.get("react"):
+    if line.get("react") and not LIVE2D:
         # リアクションの行は SD 絵ごと差し替え、口パクの代わりに声に合わせて少し弾ませる
         dy = -4 * level
         if dt < 0.12:
@@ -552,9 +611,20 @@ def speaker_state(line, t):
     return level, dx + mx, dy + my, round(scale, 3)
 
 
-def frame_at(base, line, t, chars, talking=True, state=None):
+def frame_at(base, line, t, chars, talking=True, state=None, l2d=None):
     img = base.copy()
     for name in ("めたん", "ずんだもん"):
+        if l2d:
+            # Live2D：表情と口は live2d_frames.py が動かしている。ここでは位置のずれと暗くするだけ
+            im = l2d[name]
+            dx = dy = 0
+            if talking and name == line["speaker"]:
+                dx, dy = motion_offset(line["motion"], t - line["start"])
+            elif talking:
+                im = dimmed(im)
+            x, y = char_pos(name, im)
+            img.paste(im, (x + dx, y + dy), im)
+            continue
         frames, dim = chars[name]
         dx, dy, scale = 0, 0, 1.0
         if talking and name == line["speaker"]:
@@ -675,7 +745,12 @@ def main():
     if args.still:
         ln = next(l for l in lines if l["no"] == args.still)
         t = ln["start"] + (ln["end"] - ln["start"]) / 3
-        frame_at(base_frame(ln, t), ln, t, chars).save(os.path.join(OUT, f"still_{args.still:03d}.png"))
+        l2d = None
+        if LIVE2D:
+            stream = Live2DStream(lines, round(t * FPS), 1)
+            l2d = stream.next()
+            stream.close()
+        frame_at(base_frame(ln, t), ln, t, chars, l2d=l2d).save(os.path.join(OUT, f"still_{args.still:03d}.png"))
         return
 
     print(write_description(lines))
@@ -703,11 +778,13 @@ def main():
            *VIDEO_CODEC, "-pix_fmt", "yuv420p",
            "-c:a", "aac", "-b:a", "192k", os.path.join(OUT, name)]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    stream = Live2DStream(lines, 0, n_frames) if LIVE2D else None
 
     li, base, card, card_for = 0, None, None, None
     prev_key, prev_bytes = None, None
     for i in range(n_frames):
         t = i / FPS
+        l2d = stream.next() if stream else None
         # 次の行の開始時刻を過ぎたら行を進める（行間の無音は前の行の画面のまま）
         while li + 1 < len(lines) and t >= lines[li + 1]["start"]:
             li += 1
@@ -731,20 +808,23 @@ def main():
                 bg = Image.blend(next_base, card, max(0.0, a))
             else:
                 a, bg = 1.0, card
-            key = ("card", card_for, a, t > c1 - FADE)
+            key = ("card", card_for, a, t > c1 - FADE, i if stream else 0)
             if key != prev_key:
-                prev_bytes = frame_at(bg, lines[li], t, chars, talking=False).tobytes()
+                prev_bytes = frame_at(bg, lines[li], t, chars, talking=False, l2d=l2d).tobytes()
         else:
             state = speaker_state(lines[li], t)
-            key = (li, state, i if lines[li]["spec"][0] == "screencam" else 0)
+            # Live2D の回は、呼吸やまばたきで毎コマ絵が変わるので使い回さない
+            key = (li, state, i if lines[li]["spec"][0] == "screencam" or stream else 0)
             # 口の開き・位置・拡大率が前のコマと同じなら、組み立て直さずに使い回す
             if key != prev_key:
-                prev_bytes = frame_at(base, lines[li], t, chars, state=state).tobytes()
+                prev_bytes = frame_at(base, lines[li], t, chars, state=state, l2d=l2d).tobytes()
         prev_key = key
         ff.stdin.write(prev_bytes)
         if i % (FPS * 30) == 0:
             print(f"{t:6.0f} / {total:.0f} 秒", file=sys.stderr)
     ff.stdin.close()
+    if stream:
+        stream.close()
     ff.wait()
     print(os.path.join(OUT, name), file=sys.stderr)
 

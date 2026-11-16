@@ -16,6 +16,30 @@
 | 春日部つむぎ | 第4弾の冒頭に登場（第3弾で出番がなく、機嫌が悪い）。第5弾から本編のレギュラー | 春日部つむぎ ノーマル（ID 8） | 第4弾では中央にSD立ち絵（口パクなし）。第5弾は字幕の右、ずんだもんの隣に小さく |
 | 冥鳴ひまり | 第3弾でデモの話しかける役 | 冥鳴ひまり ノーマル（ID 14）、中央から鳴らす | 立ち絵なし |
 
+## 見た目（第7弾から Live2D）
+
+第6弾までは、めたんとずんだもんは公式の SD 絵（口パクの差分と、リアクションの表情違い）。
+第7弾からは、公式ショップで買った Live2D モデル（坂本アヒル式）で動かす。つむぎは SD 絵のまま。
+モデルは `assets/live2d/` に置き、リポジトリには入れない（README の「Live2D」）。
+
+- 口は声の大きさで動く。しゃべっていないときも、呼吸とまばたきで少し動く。しゃべっていない側は暗くする（今までどおり）。
+- `direction.tsv` の `react` には、SD 絵の名前（`met_s222` など）ではなく、Live2D の表情とモーションの名前を `+` でつないで書く。
+  例：`exp_sad+mtnFace_sad`。表情もモーションもその行のあいだだけで、行が終わると 0.4 秒かけてふだんに戻る。
+  モデルにない名前を書くと `render.py` が止まって、使える名前の一覧を出す。
+- 表情（めたん）：`exp_laugh` `exp_laugh2` `exp_sad`〜`exp_sad4` `exp_angry`〜`exp_angry3` `exp_shy` `exp_shy2` `exp_surprise` `exp_wink`、
+  ポーズつきの `exp_1`〜`exp_6` `pose_Middle` `pose_Waist` `pose_manju`（まんじゅう）`pose_microphone` など。
+- 表情（ずんだもん）：`exp_smile` `exp_laugh` `exp_laugh2` `exp_sad`〜`exp_sad3` `exp_angry`〜`exp_angry3` `exp_shy` `exp_shy2`
+  `exp_surprise` `exp_surprise2` `exp_sleep`、ポーズつきの `exp_01`〜`exp_05` `pose_Upper`（手を上げる）`pose_cross`（腕組み）`pose_chop` など。
+- モーション（2 人とも）：`mtnBody_angry` `mtnBody_laugh` `mtnBody_no` `mtnBody_point` `mtnBody_think` `mtnBody_tremble` `mtnBody_yes`
+  （ずんだもんは `mtnBody_wave` も）、顔だけの `mtnFace_laugh` `mtnFace_sad` `mtnFace_shy` `mtnFace_surprise`。
+  `mtnFace_sad` は目を閉じたまま。`mtnBody_yes`（ずんだもん）は腕組みになる。
+- 衣装替え（めたんの `pose_costume_*`）は使わない。`react` に書いても `render.py` が止める。
+- `motion` 列の `jump`・`shake` はそのまま使える。SD 絵のときの、リアクションの行で絵が弾む動きはない（表情が変わるので）。
+- 概要欄のクレジットは「イラスト: 東北ずん子・ずんだもんプロジェクト公式素材をもとに作成」の代わりに、
+  「Live2D モデル: 四国めたん・ずんだもん（坂本アヒル式）東北ずん子・ずんだもんプロジェクト公式ショップ」と書く。
+  つむぎの SD 立ち絵のクレジットは残す。
+- サムネイル（`video/make_thumbnail.py`）はまだ SD 絵。
+
 ## 四国めたん
 
 - 公式：高等部二年生、17 歳、身長 150cm。弓道部。常に金欠。趣味は中二病妄想。性格は若干ツンデレ気味。

@@ -71,10 +71,12 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `video/make_mouths.py` | 公式の SD 絵から口パク用の差分（閉じ・半開き・開き）を作る |
 | `video/termshot.py` | コマンドを仮想の端末で動かし、画面を PNG にする（pyte が必要） |
 | `video/termrec.py` | コマンドを仮想の端末で動かして出力と時刻を記録し、あとで動画にする（pyte が必要） |
+| `video/live2d_frames.py` | 第7弾から：Live2D のめたんとずんだもんを台本の時間どおりに動かし、`render.py` に 1 コマずつ渡す |
 | `video/render.py` | 動画 `video.mp4`、概要欄 `description.txt`、字幕 `subtitles.srt`（`--srt`）を作る |
 | `video/make_thumbnail.py` | サムネイル `thumbnail.png`（1280x720）を作る |
 | `assets/fetch_official.sh` | 公式の SD 絵（ふだんの絵とリアクション用の表情違い）を zunko.jp から取ってくる |
 | `assets/fetch_bgm.sh` | BGM（魔王魂）を取ってくる |
+| `assets/live2d/` | 公式ショップの Live2D モデル（坂本アヒル式）。リポジトリには入れない |
 | `assets/bg/rgb_desk.jpg` | 背景写真（CC0） |
 
 ## 必要なもの
@@ -83,6 +85,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 - ffmpeg
 - VOICEVOX ENGINE（既定は `http://localhost:50021`。`VOICEVOX_URL` で変えられる）
 - フォント：Noto Sans CJK JP、PlemolJP Console（AUR の `ttf-plemoljp-bin`。第5弾までは Cica）（パスは `video/render.py` の先頭）
+- 第7弾から：公式ショップの Live2D モデル（`assets/live2d/`）と、それを動かす `.venv-live2d`（下の「Live2D」）
 
 ## 作り方
 
@@ -94,6 +97,22 @@ python3 voice/synth.py           # 音声を合成（--kana all で読みの確�
 python3 video/render.py          # 動画と概要欄を作る
 EPISODE=ep01 python3 video/render.py   # 前の回を作り直す
 ```
+
+### Live2D（第7弾から）
+
+第7弾から、めたんとずんだもんは Live2D で動かします（つむぎは SD 絵のまま）。表情の付け方は `characters.md` の「見た目」を見てください。
+
+```sh
+# 公式ショップで買った zip を assets/live2d/ に置いて展開する（中のフォルダ名を metan/ と zundamon/ にする）
+#   assets/live2d/metan/shikoku_metan.model3.json
+#   assets/live2d/zundamon/zundamon.model3.json
+python3 -m venv .venv-live2d
+.venv-live2d/bin/pip install live2d-py==1.0.0 glfw PyOpenGL numpy pillow
+```
+
+`render.py` はシステムの Python のまま動き、`.venv-live2d` で `video/live2d_frames.py` を子プロセスとして立ち上げて、1 コマずつ絵を受け取ります。
+GPU（OpenGL）で描くので、デスクトップのセッションの中で動かしてください（見えないウィンドウを作ります）。
+live2d-py は Live2D Cubism SDK を使います。個人の制作では出版許諾契約は要りません（[SDK のライセンス](https://www.live2d.com/sdk/license/)）。
 
 読みの置き換えは、行ごとの読み（`direction.tsv` の `yomi` 列、例 `九割五分=きゅうわりごぶ;黄色=きいろ`）→ この動画の辞書 → シリーズ共通の辞書の順に当てます。
 VOICEVOX 本体のユーザー辞書は変更しません。英字の語は単語の区切りでだけ置き換えます（`ini` は `Gemini` には当たりません）。
