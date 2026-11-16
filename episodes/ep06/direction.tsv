@@ -13,7 +13,7 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 12	つむぎ								
 13	ずんだもん					zunmon_3013			
 14	めたん			2.4					
-15	つむぎ				shake	angry			
+15	つむぎ			1.2	shake	angry			
 16	めたん					met_s222			
 17	ずんだもん					zunmon_3015			
 18	めたん								
@@ -103,7 +103,7 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 102	めたん								
 103	めたん			2.4			訳を=ヤクを		
 104	ずんだもん					zunmon_3019			
-105	めたん					met_s221	1.18=いってんいちはち		
+105	めたん					met_s221	1.18=イッテンイチハチ		
 106	ずんだもん								
 107	つむぎ								
 108	ずんだもん	ツンツン			shake	zunmon_3021			
