@@ -413,7 +413,10 @@ def check_live2d_react(no, speaker, react):
     """Live2D の回の react が、モデルにある表情・モーションの名前か確かめる。SD 絵の名前のままだと止める。"""
     import live2d_frames
     exps, motions = live2d_frames.model_vocab(SLUG[speaker])
-    bad = [n for n in react.split("+") if n not in exps | motions]
+    names = react.split("+")
+    bad = [n for n in names if n not in exps | motions]
+    if not bad and (sum(n in exps for n in names) > 1 or sum(n in motions for n in names) > 1):
+        raise SystemExit(f"{no} 行（{speaker}）の react {react}：表情とモーションは 1 つずつまでです")
     if bad:
         raise SystemExit(f"{no} 行（{speaker}）の react {'+'.join(bad)} は Live2D モデルにありません。\n"
                          f"表情: {' '.join(sorted(exps))}\nモーション: {' '.join(sorted(motions))}")

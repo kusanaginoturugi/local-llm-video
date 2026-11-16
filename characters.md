@@ -24,7 +24,7 @@
 
 - 口は声の大きさで動く。しゃべっていないときも、呼吸とまばたきで少し動く。しゃべっていない側は暗くする（今までどおり）。
 - `direction.tsv` の `react` には、SD 絵の名前（`met_s222` など）ではなく、Live2D の表情とモーションの名前を `+` でつないで書く。
-  例：`exp_sad+mtnFace_sad`。表情もモーションもその行のあいだだけで、行が終わると 0.4 秒かけてふだんに戻る。
+  例：`exp_sad+mtnFace_sad`（表情とモーションは 1 つずつまで）。表情もモーションもその行のあいだだけで、行が終わると 0.4 秒かけてふだんに戻る。
   モデルにない名前を書くと `render.py` が止まって、使える名前の一覧を出す。
 - 表情（めたん）：`exp_laugh` `exp_laugh2` `exp_sad`〜`exp_sad4` `exp_angry`〜`exp_angry3` `exp_shy` `exp_shy2` `exp_surprise` `exp_wink`、
   ポーズつきの `exp_1`〜`exp_6` `pose_Middle` `pose_Waist` `pose_manju`（まんじゅう）`pose_microphone` など。

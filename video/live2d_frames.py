@@ -155,6 +155,7 @@ def main():
             c = chars[s]
             m = c["model"]
             # 行の頭で、その行の表情とモーションを入れる。行が終わったら表情を戻す
+            # 行の終わりの余韻（0.3 秒）が次の行にかかったら、あとから始まった行を使う
             want = None
             for a, b, react in events[s]:
                 if a <= i < b:
@@ -162,9 +163,13 @@ def main():
                     if i == a:
                         for name in react:
                             if name in c["motions"]:
+                                if c["reset"] + RESET > i:
+                                    # 前の行のモーションがまだ戻りきっていない。残りを消してから始める
+                                    m.StopAllMotions()
+                                    m.ResetAllParameters()
+                                    m.SaveParameters()
                                 m.StartMotion("", c["motions"][name], 3)
                                 c["reset"] = b   # 行が終わったら止める
-                    break
             # このモデルのモーションはループするうえ、止めても最後の値が残る。
             # 行が終わったら止めて、RESET コマかけて初期値に寄せ、最後に保存されている値ごと初期値にする
             if i == c["reset"]:
