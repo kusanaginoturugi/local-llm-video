@@ -409,8 +409,15 @@ def mouth_track(query, start):
     return track
 
 
+def is_sd_react(react):
+    """react が SD 絵の名前か。Live2D の回でも、オチの場面だけ SD 絵に切り替えられる（漫画で急に絵が崩れるように）。"""
+    return bool(react) and "+" not in react and os.path.exists(os.path.join(SD_DIR, react + ".png"))
+
+
 def check_live2d_react(no, speaker, react):
-    """Live2D の回の react が、モデルにある表情・モーションの名前か確かめる。SD 絵の名前のままだと止める。"""
+    """Live2D の回の react が、SD 絵か、モデルにある表情・モーションの名前か確かめる。"""
+    if is_sd_react(react):
+        return
     import live2d_frames
     exps, motions = live2d_frames.model_vocab(SLUG[speaker])
     names = react.split("+")
@@ -419,7 +426,8 @@ def check_live2d_react(no, speaker, react):
         raise SystemExit(f"{no} 行（{speaker}）の react {react}：表情とモーションは 1 つずつまでです")
     if bad:
         raise SystemExit(f"{no} 行（{speaker}）の react {'+'.join(bad)} は Live2D モデルにありません。\n"
-                         f"表情: {' '.join(sorted(exps))}\nモーション: {' '.join(sorted(motions))}")
+                         f"表情: {' '.join(sorted(exps))}\nモーション: {' '.join(sorted(motions))}\n"
+                         f"SD 絵（{SD_DIR}）の名前なら、その行だけ SD 絵になります")
 
 
 class Live2DStream:
@@ -431,7 +439,7 @@ class Live2DStream:
         plan = {"fps": FPS, "start": start, "count": count, "lines": [
             {"slug": SLUG[l["speaker"]], "start": l["start"], "end": l["end"],
              "wav": os.path.join(VOICE, f"{l['no']:03d}_{SLUG[l['speaker']]}.wav"),
-             "react": l["react"].split("+") if l["react"] else []}
+             "react": l["react"].split("+") if l["react"] and not is_sd_react(l["react"]) else []}
             for l in lines if l["speaker"] in SLUG]}
         self.plan = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
         json.dump(plan, self.plan)
@@ -603,13 +611,16 @@ def speaker_state(line, t):
             level = lv
             break
     dx, dy, scale = 0, 0, 1.0
-    if line.get("react") and not LIVE2D:
-        # リアクションの行は SD 絵ごと差し替え、口パクの代わりに声に合わせて少し弾ませる
+    if line.get("react"):
+        # リアクションの行は、出るときに弾ませ（0.85 → 1.1 → 1.0）、声に合わせて少し跳ねさせる。
+        # SD 絵は口パクがないのでその代わり。Live2D でも表情が変わるのに合わせて弾ませる
         dy = -4 * level
         if dt < 0.12:
             scale = 0.85 + 0.25 * dt / 0.12   # 0.85 → 1.1
         elif dt < 0.24:
             scale = 1.1 - 0.1 * (dt - 0.12) / 0.12
+    elif LIVE2D:
+        dy = -3 * level   # Live2D はふだんの行も、声に合わせて少し跳ねさせる
     mx, my = motion_offset(line["motion"], dt)
     return level, dx + mx, dy + my, round(scale, 3)
 
@@ -622,7 +633,11 @@ def frame_at(base, line, t, chars, talking=True, state=None, l2d=None):
             im = l2d[name]
             dx = dy = 0
             if talking and name == line["speaker"]:
-                dx, dy = motion_offset(line["motion"], t - line["start"])
+                _, dx, dy, scale = state or speaker_state(line, t)
+                if is_sd_react(line["react"]):
+                    im = sd_image(line["react"])
+                if scale != 1.0:
+                    im = im.resize((round(im.width * scale), round(im.height * scale)), Image.BILINEAR)
             elif talking:
                 im = dimmed(im)
             x, y = char_pos(name, im)

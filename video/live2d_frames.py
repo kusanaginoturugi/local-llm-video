@@ -194,6 +194,8 @@ def main():
             target = mouth[s].get(i, 0.0)
             c["mv"] = target if target > c["mv"] else c["mv"] * 0.55 + target * 0.45
             m.SetParamById("ParamMouthOpenY", c["mv"])
+            # しゃべっているあいだは、声に合わせて顔を少し上げる（うなずくように動く）
+            m.AddParamById("ParamAngleY", 8 * c["mv"])
             # まばたき：0.15 秒で閉じて開く。間は 2.5〜5 秒でばらす（キャラごとに決まった乱数）
             if t >= c["blink"]:
                 k = (t - c["blink"]) / 0.15
