@@ -4,7 +4,7 @@
   python3 termshot.py out.png --cols 120 --rows 36 --at 6 -- nvtop
   python3 termshot.py out.png --at 20 --type "こんにちは\\n" -- llama-cli -hf ...
 
-必要なもの: pyte（pip install pyte）、Pillow、Cica フォント。
+必要なもの: pyte（pip install pyte）、Pillow、PlemolJP Console フォント（AUR の ttf-plemoljp-bin）。
 """
 import argparse
 import os
@@ -17,8 +17,8 @@ import time
 import pyte
 from PIL import Image, ImageDraw, ImageFont
 
-FONT = "/usr/share/fonts/TTF/Cica-Regular.ttf"
-FONT_BOLD = "/usr/share/fonts/TTF/Cica-Bold.ttf"
+FONT = "/usr/share/fonts/PlemolJP/PlemolJPConsole-Regular.ttf"
+FONT_BOLD = "/usr/share/fonts/PlemolJP/PlemolJPConsole-Bold.ttf"
 BG = (24, 26, 33)
 FG = (220, 223, 230)
 # 端末の 16 色（暗い背景向け）

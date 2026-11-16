@@ -35,8 +35,9 @@ W, H, FPS = 1920, 1080, 30
 SIDE = 440                         # 左右のキャラの列の幅（左右で同じ）
 SLIDE_BOX = (80, 64, W - 80, 812)   # 画面（スライド）を置く範囲。下の角にはキャラが少しかぶる
 SUB_BOX = (SIDE, 828, W - SIDE, 1052)  # 字幕
-TSUMUGI_W = 210                     # 第5弾：字幕の右に、つむぎの立つ場所を空ける
-if episode.NAME == "ep05":
+TSUMUGI_W = 210                     # 第5弾から：字幕の右に、つむぎの立つ場所を空ける
+TSUMUGI_REGULAR = int(episode.NAME[2:]) >= 5  # つむぎは第5弾から本編のレギュラー
+if TSUMUGI_REGULAR:
     SUB_BOX = (SIDE, 828, W - SIDE - TSUMUGI_W, 1052)
 BG = (24, 26, 33)
 PANEL = (40, 43, 54)
@@ -67,7 +68,7 @@ BGM_FILTER = "highpass=f=150,lowpass=f=3500"  # 帯域を絞って声の後ろ�
 
 JP = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
 JP_BOLD = "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"
-MONO = "/usr/share/fonts/TTF/Cica-Regular.ttf"
+MONO = "/usr/share/fonts/PlemolJP/PlemolJPConsole-Regular.ttf"
 EMOJI = "/usr/share/fonts/noto/NotoColorEmoji.ttf"  # カラー絵文字（109px のビットマップだけを持つ）
 _fonts = {}
 _cam_frames = {}
@@ -416,7 +417,7 @@ def load_chars():
             f2.alpha_composite(dark)
             dim.append(f2)
         chars[name] = (frames, dim)
-    if episode.NAME in ("ep04", "ep05"):
+    if episode.NAME == "ep04" or TSUMUGI_REGULAR:
         # 第4弾は乱入用に大きく、中央でタイトルに重ねる。第5弾は本編にいるので小さく、字幕の箱の上に立たせる
         for mood in ("angry", "happy"):
             source = os.path.join(ROOT, "assets", "official", f"tsumugi-sd-{mood}.png")
@@ -572,8 +573,8 @@ def frame_at(base, line, t, chars, talking=True, state=None):
         im = chars["つむぎ-angry" if angry else "つむぎ-happy"]
         dy = motion_offset(line["motion"], t - line["start"])[1] if line["speaker"] == "つむぎ" else 0
         img.paste(im, ((W - im.width) // 2, 805 - im.height + dy), im)
-    # 第5弾のつむぎは最初から本編にいる。字幕の右の空き（ずんだもんの隣）に立ち、しゃべっていないときは二人と同じく暗くする
-    if episode.NAME == "ep05":
+    # 第5弾からのつむぎは最初から本編にいる。字幕の右の空き（ずんだもんの隣）に立ち、しゃべっていないときは二人と同じく暗くする
+    if TSUMUGI_REGULAR:
         speaking = talking and line["speaker"] == "つむぎ"
         im = chars[f"つむぎ-{line['tsumugi']}" + ("" if speaking or not talking else "-dim")]
         dy = motion_offset(line["motion"], t - line["start"])[1] if speaking else 0

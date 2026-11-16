@@ -74,7 +74,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 - Python 3（Pillow、numpy）
 - ffmpeg
 - VOICEVOX ENGINE（既定は `http://localhost:50021`。`VOICEVOX_URL` で変えられる）
-- フォント：Noto Sans CJK JP、Cica（パスは `video/render.py` の先頭）
+- フォント：Noto Sans CJK JP、PlemolJP Console（AUR の `ttf-plemoljp-bin`。第5弾までは Cica）（パスは `video/render.py` の先頭）
 
 ## 作り方
 

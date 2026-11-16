@@ -6,7 +6,7 @@
 
 record は、画面に出た文字をそのまま時刻つきで残す（最初に --show の行を、打ち込んだコマンドとして出す）。
 render は、記録を時刻どおりに仮想の端末へ流し直して、1 コマずつ絵にする。--speed で早送りできる。
-最後の画面は --hold 秒そのまま残す。必要なもの: pyte、Pillow、ffmpeg、Cica フォント。
+最後の画面は --hold 秒そのまま残す。必要なもの: pyte、Pillow、ffmpeg、PlemolJP Console フォント（AUR の ttf-plemoljp-bin）。
 """
 import argparse
 import base64
