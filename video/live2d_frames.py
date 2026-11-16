@@ -27,7 +27,8 @@ SS = 2  # 2 倍の大きさで描いて縮める（ふちのギザギザを消�
 # 横幅は「高さ × 出す大きさの縦横比」で決まり、cx を中心に切る
 CHARS = {
     "metan": {"model": "assets/live2d/metan/shikoku_metan.model3.json",
-              "cx": 557, "top": 540, "bottom": 1352, "size": (440, 470)},  # 髪の幅 約 735px が列に収まる
+              "cx": 557, "top": 540, "bottom": 1352, "size": (440, 470), "flip": True},  # 髪の幅 約 735px が列に収まる。
+    # めたんの絵は体ごと画面の左を向いているので、左右を反転して右（ずんだもんの側）を向かせる
     "zundamon": {"model": "assets/live2d/zundamon/zundamon.model3.json",
                  "cx": 540, "top": 500, "bottom": 1312, "size": (440, 470)},  # めたんと同じ倍率。耳が立っても切れない
 }
@@ -217,6 +218,8 @@ def main():
             GL.glBindFramebuffer(GL.GL_READ_FRAMEBUFFER, c["small"])
             px = GL.glReadPixels(0, 0, ow, oh, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE)
             a = np.frombuffer(px, dtype=np.uint8).reshape(oh, ow, 4)[::-1].astype(np.uint16)
+            if CHARS[s].get("flip"):
+                a = a[:, ::-1]
             # Live2D の色は α を掛けた値なので、PIL で貼れるように戻す
             alpha = a[..., 3:4]
             a[..., :3] = np.minimum(a[..., :3] * 255 // np.maximum(alpha, 1), 255)
