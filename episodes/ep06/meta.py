@@ -7,7 +7,7 @@ PLAMO = "https://huggingface.co/pfnet/plamo-3-translate-0.8b-GGUF"
 RAPIDOCR = "https://github.com/RapidAI/RapidOCR"
 PADDLEOCR = "https://github.com/PaddlePaddle/PaddleOCR"
 TESSERACT = "https://github.com/tesseract-ocr/tesseract"
-ALICE = "https://www.gutenberg.org/ebooks/11"
+ALICE = "https://www.gutenberg.org/ebooks/19002"
 ARTICLE = ""
 
 THUMBNAIL = {
@@ -15,7 +15,7 @@ THUMBNAIL = {
     "color": (150, 210, 255),
     "title": "Kindleの英語の本を",
     "title2": "手元のLLMで読む",
-    "pill": ("1画面", "1秒"),
+    "pill": ("1画面", "1.5秒"),
     "metan": "met_s222",
     "zundamon": "zunmon_3022",
 }
@@ -26,7 +26,7 @@ def description(chapters):
         "『ローカル LLM で遊ぼう』第6弾。Kindle で買った英語の本を、手元の LLM で訳して読みます。",
         "Kindle Cloud Reader はページの中に文字がないので、翻訳の拡張は効きません。そこで画面を 1 画面ずつ OCR して、",
         "手元の LLM で訳し、Emacs に足していく kindle-ja を作りました。本の鍵（DRM）は外しません。",
-        "最初は 1 画面 5.6 秒。翻訳を PLaMo 3 Translate 0.8B に、OCR を GPU の RapidOCR に替えて、1 画面 1 秒になりました。",
+        "最初は 1 画面 約 8 秒。翻訳を PLaMo 3 Translate 0.8B に、OCR を GPU の RapidOCR に替えて、1 画面 約 1.5 秒になりました。",
         "訳を VOICEVOX で読み上げることもできます。",
         "",
         *(["■ 解説記事", ARTICLE, ""] if ARTICLE else []),
@@ -35,11 +35,12 @@ def description(chapters):
         "訳は普通のテキストファイル（Org）に足していくだけなので、Emacs 以外のエディタでも読めます。",
         "表示の部分は、自分のコーディングエージェントに頼んで書き換えてください。",
         "",
-        "■ 1 画面の時間（Alice の第 1 章冒頭 253 語、Ryzen 7 3700X、RTX 3060 12GB、llama.cpp v0.9.0）",
-        "最初の版（tesseract ＋ Gemma 4 E4B）：約 5.6 秒（OCR 1.3 秒、翻訳 4.3 秒）",
-        "Gemma 4 12B：約 10.7 秒（E4B と同時には VRAM に載らない）",
-        "翻訳を PLaMo 3 Translate 0.8B に：約 1.95 秒（翻訳 0.65 秒）",
-        "OCR も GPU の RapidOCR（常駐）に：約 1.0 秒",
+        "■ 1 画面の時間（Kindle Cloud Reader の Chapter I の冒頭、見出しと本文 約 360 語、Ryzen 7 3700X、RTX 3060 12GB、llama.cpp v0.9.0）",
+        "最初の版（tesseract ＋ Gemma 4 E4B）：約 8 秒（OCR 1.3 秒、翻訳 7.0 秒）",
+        "Gemma 4 12B：約 15 秒（E4B と同時には VRAM に載らない）",
+        "翻訳を PLaMo 3 Translate 0.8B に：約 2.1 秒（翻訳 0.9 秒）",
+        "OCR も GPU の RapidOCR（常駐）に：約 1.5 秒（OCR 0.5 秒）",
+        "3 回ずつ測った値（モデルを読み込んだあと）。動画の実録は 1 回分です（最初の版は 2 倍速）。",
         "",
         "■ OCR の比べ（Kindle の画面 1 枚、tesseract（2 倍に拡大）と単語が食い違った数）",
         "PaddleOCR 3.7 本体（PP-OCRv6 medium、GPU、拡大なし）：0.49 秒、食い違い 0（環境は Python 3.12 込みで約 10GB）",
@@ -50,7 +51,8 @@ def description(chapters):
         *chapters,
         "",
         "■ この動画で使ったもの",
-        f"デモの本: Lewis Carroll『Alice's Adventures in Wonderland』（1865、保護期間満了。Kindle の無料版、Project Gutenberg）: {ALICE}",
+        "デモの本: Lewis Carroll『Alice's Adventures Under Ground』（地下の国のアリス。1864 年の手書き本を 1886 年に複製したもの、保護期間満了。Kindle の 0 円の版）",
+        f"同じ本の Project Gutenberg 版: {ALICE}",
         f"PLaMo 3 Translate 0.8B（Preferred Networks）: {PLAMO}",
         f"RapidOCR: {RAPIDOCR}",
         f"PaddleOCR: {PADDLEOCR}",

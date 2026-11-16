@@ -41,7 +41,7 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 40	つむぎ								
 41	めたん								
 42	めたん								
-43	ずんだもん		1.3	4.0	jump	zunmon_3022			
+43	ずんだもん		1.3	2.7	jump	zunmon_3022			
 44	つむぎ								
 45	めたん								
 46	ずんだもん			2.4		zunmon_3030			
@@ -92,14 +92,14 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 91	めたん					met_s214			
 92	つむぎ		1.2		jump	happy			
 93	ずんだもん			2.4		zunmon_3030	訳は=ヤクワ		
-94	めたん								
+94	めたん						dear, dear! I shall be too late!=ディア、ディア！ アイ、シャル、ビー、トゥー、レイト！		
 95	つむぎ				shake	angry			
 96	めたん								
 97	めたん					met_s215			
 98	ずんだもん		1.3		jump	zunmon_3021			
-99	めたん								
+99	めたん						dear=ディア		
 100	つむぎ					happy			
-101	ずんだもん					zunmon_3016			
+101	ずんだもん					zunmon_3009			
 102	めたん								
 103	めたん			2.4			訳を=ヤクを		
 104	ずんだもん					zunmon_3019			
@@ -107,7 +107,7 @@ no	speaker	style	intonation	gap	motion	react	yomi	kana	memo
 106	ずんだもん								
 107	つむぎ								
 108	ずんだもん	ツンツン			shake	zunmon_3021			
-109	めたん								
+109	めたん						訳が=ヤクが		
 110	めたん								
 111	ずんだもん		1.3		jump	zunmon_3022			
 112	つむぎ			2.4					

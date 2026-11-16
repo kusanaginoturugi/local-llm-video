@@ -36,7 +36,15 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
   - CPU と GPU の端末の画面は `video/termrec.py` で実行の記録を取り、時刻どおりに再生して作った（`demo/rec/`）。Firefox の検索の画面は `demo/rec/record_firefox.sh` で撮った
   - 計測と答え合わせの数字、判断の経緯は `episodes/ep05/notes.md`
 
-第1〜3弾の制作には Claude Code、画面の撮影には Claude in Chrome を使用しました。第4弾の台本・記事・検証・動画の組み立てには Codex GPT-6-Sol、第5弾には Claude Code（Claude Opus 5.5）を使用しました。
+- 第6弾：Kindle の英語の本を、手元の LLM で訳して読む（`episodes/ep06/`）
+  - 作った kindle-ja: https://github.com/kusanaginoturugi/kindle-ja
+  - 台本は `episodes/ep06/build_script.py`、演出と章は `episodes/ep06/build_direction.py` から生成する
+  - デモの本は Kindle の 0 円の『地下の国のアリス』（Alice's Adventures Under Ground、1886 年の手書き本の複製、保護期間満了）。制作者が買った本のページや本文は出さない
+  - 計測・実録・静止画は `demo/record_kindle.sh`（ワークスペース 9 に Firefox と kindle-ja の Emacs を並べて撮る）。実録は `demo/rec/`、静止画は `slides/`
+  - 計測の数字、撮影でつまずいたこと、判断の経緯は `episodes/ep06/notes.md`
+  - 第6弾は RTX 3060 の PC で作った（第5弾までは RTX 4070）。この PC にはつむぎの SD 絵がないので、確認用の動画はダミーの絵で組み立てた
+
+第1〜3弾の制作には Claude Code、画面の撮影には Claude in Chrome を使用しました。第4弾の台本・記事・検証・動画の組み立てには Codex GPT-6-Sol、第5・6弾には Claude Code（Claude Opus 5.5）を使用しました。
 
 ## 構成
 
