@@ -175,16 +175,23 @@ def write(name, header, rows):
         writer.writerows(rows)
 
 
+# 全編を作って見たあと、全体をもう少し速くした（制作者：1.2 倍は「早口とか倍速動画っぽく」なるので 1.1 倍）。
+# 声の速さに TEMPO を掛け、行の前の間を TEMPO で割る。お囃子の音そのものは速くしない
+TEMPO = 1.1
+DEFAULT_GAP = 0.35  # synth.py の GAP_SEC（これまでの回の間）
+
+
 def speed(no, speaker):
     if speaker == "お囃子":
         return ""
-    return SPEED.get(no, (HANASHI if 16 <= no <= 255 else TALK)[speaker])
+    return round(SPEED.get(no, (HANASHI if 16 <= no <= 255 else TALK)[speaker]) * TEMPO, 3)
 
 
 def gap(no):
-    if no in GAP:
-        return GAP[no]
-    return HANASHI_GAP if 16 <= no <= 255 else ""
+    if no == 1:
+        return ""
+    g = GAP.get(no, HANASHI_GAP if 16 <= no <= 255 else DEFAULT_GAP)
+    return round(g / TEMPO, 3)
 
 
 section = ""

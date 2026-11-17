@@ -62,7 +62,7 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
 | `episodes/epNN/direction.tsv` | 行ごとの演出（声のスタイル・抑揚・速さ `speed`・前の間・動き・リアクションの SD 絵／Live2D の表情）と、その行だけの読み（`yomi`）。`sound` 列に wav を書くと、その行は声の代わりにその音を鳴らす（番外編のお囃子） |
 | `episodes/epNN/dict.tsv` | この回だけで使う読み |
 | `episodes/epNN/screens.tsv` | 行ごとのセクション名と、台本の「画面」欄 |
-| `episodes/epNN/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど） |
+| `episodes/epNN/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど）。`NOTES` に書くと、画面の下に補足（※）を出す（番外編から） |
 | `episodes/epNN/slides/` | その回の構成図とスクリーンショット |
 | `episodes/epNN/meta.py` | 概要欄の文面とサムネイルの文言 |
 | `episodes/epNN/demo/` | 撮影や検証に使った設定と素材 |

@@ -25,6 +25,8 @@ sys.path.insert(0, ROOT)
 import episode  # noqa: E402
 
 SLIDES = episode.module("slides").SLIDES
+# 画面の下の空きに出す補足（※）。{行番号: (文, 何行のあいだ出すか)}。番外編から（今の言葉で分かりにくい語の説明）
+NOTES = getattr(episode.module("slides"), "NOTES", {})
 META = episode.module("meta")  # 概要欄の文面とリンク
 VOICE = episode.VOICE_OUT
 CHARS = os.path.join(ROOT, "assets", "chars")
@@ -547,6 +549,7 @@ def load_lines():
             "no": no, "speaker": r["speaker"], "text": r["text"],
             "start": float(r["start"]), "end": float(r["end"]),
             "section": sections.get(r["no"], ""), "spec": spec, "slide_start": slide_start,
+            "notes": [text for s, (text, n) in sorted(NOTES.items()) if s <= no < s + n],
             "motion": r.get("motion", ""),
             "react": reacts.get(r["no"], ""),
             "tsumugi": mood,
@@ -589,8 +592,22 @@ def background():
 def base_frame(line, t=None):
     img = background().copy()
     draw_slide(img, line["spec"], line["section"], 0 if t is None else t - line["slide_start"])
+    draw_notes(img, line.get("notes", []))
     draw_subtitle(img, line["speaker"], line["subtitle"])
     return img
+
+
+def draw_notes(img, notes):
+    """補足（※）を、画面の下のほう、左右のキャラのあいだに小さく出す。新しいものほど下。"""
+    if not notes:
+        return
+    d = ImageDraw.Draw(img)
+    f = font(JP, 28)
+    x0, x1 = SIDE + 20, W - SIDE - 20
+    rows = [l for n in notes for l in wrap(n, f, x1 - x0)]
+    y = SLIDE_BOX[3] - 24 - 40 * len(rows)
+    for i, l in enumerate(rows):
+        d.text((x0, y + 40 * i), l, font=f, fill=(206, 210, 222))
 
 
 def section_card(section):

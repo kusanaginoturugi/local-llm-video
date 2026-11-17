@@ -182,6 +182,32 @@
     → 制作者：`*_yose.wav` がよい。動画には `open_yose.wav` と `close_yose.wav` を使う。
   - 客席のがや（ざわめきや笑い声）も入れたいが、一度動画を見てから決める（制作者）。
 
+## この PC（RTX 3060）の VOICEVOX を GPU 版に（2026-11-17）
+
+- それまでは Docker の CPU 版（`voicevox/voicevox_engine:cpu-latest`、エンジン 0.25.2）で、nvidia-container-toolkit が入っていなかった。
+- 制作者が nvidia-container-toolkit 1.20.1 を入れ、Docker の nvidia ランタイムを設定した。
+  CPU 版のコンテナは `voicevox-cpu` に名前を変えて止め（自動起動もしない）、GPU 版（`nvidia-latest`、エンジン 0.26.2）を
+  同じ `voicevox`・127.0.0.1:50021 で立てた。ログに「CUDA (device_id=0)を利用します」。
+- 番外編の台本 30 行（917 字）を、温めてから続けて合成して比べた：CPU 版 41.1 秒（1 行 1.37 秒）→ GPU 版 4.0 秒（1 行 0.13 秒）。
+- エンジンが 0.25.2 から 0.26.2 に上がったが、番外編の全 264 行の読みとアクセント（`synth.py --kana all`）は変わらなかった。
+- 戻すとき：`docker stop voicevox && docker rename voicevox voicevox-gpu && docker rename voicevox-cpu voicevox && docker start voicevox`
+
+## 全編の組み立て（2026-11-17）
+
+- `render.py` で 18 分 59 秒（1139 秒）、382MB。組み立てに 12 分 44 秒。
+
+## 補足（※）と速さ（2026-11-17、全編を見て）
+
+- 制作者：「頼母子講がわからないかもだから、画面上の隙間にちょいちょい補足を入れるか」（例：頼母子講、支払い、1 銭、2 分）。
+  → `slides.py` の `NOTES`（{行番号: (文, 何行のあいだ出すか)}）を、`render.py` が画面の下、左右のキャラのあいだに出すようにした。
+  入れたのは 頼母子講、冷や、一合、下戸、掛け金（「支払い」はこれのことと読んだ）、身代限り、一銭、両、文、二分、四斗樽、草鞋、やりんぼう。
+  第6弾は `NOTES` がないので、静止画は前と同じ。
+- 制作者：「動画の再生速度を変える方法ある？」。比べる見本として、一回目の場面（7:34 から 2 分）を ffmpeg で 1.1 倍・1.2 倍にした
+  （`out/video/speed_1.1.mp4`、`speed_1.2.mp4`。映像は setpts、音は atempo で、声の高さは変わらない）。
+- 制作者：1.2 倍は速さとしてはよいが「早口とか倍速動画っぽく」なる。1.1 倍にする。
+  → 動画を丸ごと速くするのではなく、`build_direction.py` の `TEMPO = 1.1` で、声の速さに 1.1 を掛け、行の前の間を 1.1 で割った
+  （お囃子の音はそのまま）。全 268 行を GPU 版の VOICEVOX で作り直して 42 秒。all.wav は 18 分 58 秒 → 17 分 20 秒。
+
 ## 残っていること
 
 - 画面（`slides.py`）と概要欄（`meta.py`）。`screens.tsv` に画面の案（めくり、詰将棋の盤など）を書いた。
