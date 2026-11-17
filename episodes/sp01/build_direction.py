@@ -13,7 +13,7 @@ HERE = Path(__file__).parent
 LINES, CHAPTERS = parse()
 STARTS = dict(CHAPTERS)
 NARRATION = {99, 217}  # めたんが語る地の文
-OHAYASHI = {15: "out/debayashi/open_yose.wav", 268: "out/debayashi/close_yose.wav"}  # demo/debayashi.py で作る
+OHAYASHI = {15: "out/debayashi/open_yose.wav", 268: "out/debayashi/close_gaya_yose.wav"}  # demo/debayashi.py と gaya.py で作る
 
 SCREENS = {
     1: "タイトル", 4: "国会図書館の速記本", 9: "めくり『二人癖』", 15: "高座（出囃子）", 16: "熊さんの家",

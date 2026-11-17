@@ -589,6 +589,13 @@ def background():
     return _background
 
 
+def media_seconds(path):
+    """音や動画のファイルの長さ（秒）。"""
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
+                       capture_output=True, text=True, check=True)
+    return float(r.stdout)
+
+
 def base_frame(line, t=None):
     img = background().copy()
     draw_slide(img, line["spec"], line["section"], 0 if t is None else t - line["slide_start"])
@@ -693,7 +700,7 @@ def frame_at(base, line, t, chars, talking=True, state=None, l2d=None):
                 im = im.resize((round(im.width * scale), round(im.height * scale)), Image.BILINEAR)
         elif talking:
             im = dimmed(im)
-        img.paste(im, (SUB_BOX[2] + (TSUMUGI_W - im.width) // 2, H - 8 - im.height + dy), im)
+        img.paste(im, (SUB_BOX[2] + (TSUMUGI_W - im.width) // 2, H - im.height + dy), im)  # 2 人と同じく画面の下で切れる
     elif TSUMUGI_REGULAR:
         speaking = talking and line["speaker"] == "つむぎ"
         im = chars[f"つむぎ-{line['tsumugi']}" + ("" if speaking or not talking else "-dim")]
@@ -783,6 +790,7 @@ def write_srt(lines):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preview", type=float, help="先頭から指定秒だけ作る")
+    ap.add_argument("--start", type=float, default=0.0, help="--preview と一緒に：この秒から作る（例 --start 1000 --preview 41 で最後だけ）")
     ap.add_argument("--still", type=int, help="指定行の 1 コマを PNG で保存")
     ap.add_argument("--description", action="store_true", help="概要欄の文面だけ書き出す")
     ap.add_argument("--srt", action="store_true", help="字幕ファイル（SRT）だけ書き出す")
@@ -814,33 +822,36 @@ def main():
     print(write_description(lines))
     audio = os.path.join(VOICE, "all.wav")
     total = lines[-1]["end"] + 1.0
+    start = args.start if args.preview else 0.0  # 途中から作るのはプレビューだけ
     if args.preview:
-        total = min(total, args.preview)
+        total = min(total, start + args.preview)
     n_frames = math.ceil(total * FPS)
+    first = round(start * FPS)
     name = "preview.mp4" if args.preview else "video.mp4"
     # BGM はセリフの間だけ音量を下げる（sidechaincompress）。最初と最後はフェード
     # 歌の行（direction.tsv の sing 列）のあいだは、1 秒かけて BGM を 15% まで絞り、歌のあとに戻す
-    sing_duck = "*".join(f"(1-{1 - SING_BGM:.2f}*clip((t-{l['start'] - 1:.2f}),0,1)*clip(({l['end'] + 1:.2f}-t),0,1))"
+    # 途中から作るときは、音を start 秒から読むので、時刻は start を引いた値で書く
+    sing_duck = "*".join(f"(1-{1 - SING_BGM:.2f}*clip((t-{l['start'] - 1 - start:.2f}),0,1)*clip(({l['end'] + 1 - start:.2f}-t),0,1))"
                          for l in lines if l["sing"]) or "1"
     afilter = (
         "[1:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit[voice][key];"
         f"[2:a]aformat=sample_rates=48000:channel_layouts=stereo,{BGM_FILTER + ',' if BGM_FILTER else ''}volume={BGM_VOLUME},volume='{sing_duck}':eval=frame,"
-        f"afade=t=in:d=2,afade=t=out:st={max(0, total - 4):.2f}:d=4[bgm];"
+        f"afade=t=in:d=2,afade=t=out:st={max(0, total - start - 4):.2f}:d=4[bgm];"
         "[bgm][key]sidechaincompress=threshold=0.02:ratio=6:attack=40:release=700[duck];"
         "[voice][duck]amix=inputs=2:normalize=0:duration=longest[a]"
     )
     cmd = ["ffmpeg", "-loglevel", "error", "-y",
            "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
-           "-i", audio, "-stream_loop", "-1", "-i", BGM,
-           "-filter_complex", afilter, "-map", "0:v", "-map", "[a]", "-t", f"{total:.3f}",
+           "-ss", f"{start:.3f}", "-i", audio, "-stream_loop", "-1", "-ss", f"{start % media_seconds(BGM):.3f}", "-i", BGM,
+           "-filter_complex", afilter, "-map", "0:v", "-map", "[a]", "-t", f"{total - start:.3f}",
            *VIDEO_CODEC, "-pix_fmt", "yuv420p",
            "-c:a", "aac", "-b:a", "192k", os.path.join(OUT, name)]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    stream = Live2DStream(lines, 0, n_frames) if LIVE2D else None
+    stream = Live2DStream(lines, first, n_frames - first) if LIVE2D else None
 
     li, base, card, card_for = 0, None, None, None
     prev_key, prev_bytes = None, None
-    for i in range(n_frames):
+    for i in range(first, n_frames):
         t = i / FPS
         l2d = stream.next() if stream else None
         # 次の行の開始時刻を過ぎたら行を進める（行間の無音は前の行の画面のまま）
