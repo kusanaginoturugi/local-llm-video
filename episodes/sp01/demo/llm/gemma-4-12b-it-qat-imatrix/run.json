@@ -1,0 +1,69 @@
+{
+ "model": "gemma-4-12b-it-qat-imatrix",
+ "url": "http://127.0.0.1:8080/v1/chat/completions",
+ "temperature": 0.3,
+ "max_tokens": 6000,
+ "system": "あなたは、明治時代の落語の速記本を、今の人が読める言葉に直す編集者です。\n入力は、柳家小さん（3代目）の『二人癖』の速記の一場面です。旧字・旧仮名で、話者は行の頭に書いてあります\n（八＝八五郎、熊＝熊さん、主＝ご隠居、甲・乙＝まくらの小噺の二人、地＝地の文）。\n\n次の決まりで、現代の話し言葉に直してください。\n- 1 行に 1 つのせりふ。行の頭の話者の名前はそのまま残す。行を足したり、まとめたりしない。\n- 旧字・旧仮名は、今の漢字と仮名づかいにする。読みにくい当て字は仮名にする。\n- 江戸っ子の口調（「〜じゃねえか」「〜しねえ」）は、少しなら残してよい。\n- 話の要は口癖の言葉遊び。熊の「詰まらねえ」、八の「飲める」、仕掛けの「詰まろうか」は、必ずその言葉のまま残す。\n- 「（口へ入れる）」のような、かっこの中の動きの書きこみは残す。\n- 〔 〕の中は翻刻者の注。訳には入れない。【p37】のようなページの印は消す。\n- 説明や感想、前置きを付け足さない。直した本文だけを出す。",
+ "scenes": [
+  {
+   "no": 1,
+   "title": "まくら",
+   "seconds": 39.3,
+   "finish_reason": "stop",
+   "prompt_tokens": 1445,
+   "completion_tokens": 1085,
+   "lines_in": 44,
+   "lines_out": 42
+  },
+  {
+   "no": 2,
+   "title": "八と熊の約束",
+   "seconds": 38.7,
+   "finish_reason": "stop",
+   "prompt_tokens": 1755,
+   "completion_tokens": 1361,
+   "lines_in": 50,
+   "lines_out": 49
+  },
+  {
+   "no": 3,
+   "title": "隠居の知恵（一）大根と醤油樽",
+   "seconds": 40.5,
+   "finish_reason": "stop",
+   "prompt_tokens": 1737,
+   "completion_tokens": 1406,
+   "lines_in": 41,
+   "lines_out": 40
+  },
+  {
+   "no": 4,
+   "title": "一回目：大根の策は失敗",
+   "seconds": 30.4,
+   "finish_reason": "stop",
+   "prompt_tokens": 1477,
+   "completion_tokens": 1085,
+   "lines_in": 55,
+   "lines_out": 55
+  },
+  {
+   "no": 5,
+   "title": "隠居の知恵（二）詰将棋",
+   "seconds": 48.3,
+   "finish_reason": "stop",
+   "prompt_tokens": 1974,
+   "completion_tokens": 1696,
+   "lines_in": 53,
+   "lines_out": 52
+  },
+  {
+   "no": 6,
+   "title": "二回目：詰将棋で言わせる",
+   "seconds": 22.3,
+   "finish_reason": "stop",
+   "prompt_tokens": 1195,
+   "completion_tokens": 783,
+   "lines_in": 36,
+   "lines_out": 36
+  }
+ ]
+}
