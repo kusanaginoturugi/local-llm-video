@@ -1,8 +1,8 @@
-"""Live2D のめたんとずんだもんを、台本の時間どおりに動かして 1 コマずつ描く（第7弾から）。
+"""Live2D のめたん・ずんだもん・つむぎを、台本の時間どおりに動かして 1 コマずつ描く（第7弾と番外編から）。
 
 render.py が子プロセスとして立ち上げる。直接は使わない。
 必要なもの: リポジトリ直下の .venv-live2d（live2d-py、glfw、PyOpenGL、numpy、Pillow）、
-assets/live2d/ に置いた公式ショップの Live2D モデル（坂本アヒル式）。
+assets/live2d/ に置いた Live2D モデル（坂本アヒル式。めたん・ずんだもんは公式ショップ、つむぎは KASUKABEproject の Booth）。
 
   .venv-live2d/bin/python video/live2d_frames.py PLAN.json
 
@@ -31,6 +31,9 @@ CHARS = {
     # めたんの絵は体ごと画面の左を向いているので、左右を反転して右（ずんだもんの側）を向かせる
     "zundamon": {"model": "assets/live2d/zundamon/zundamon.model3.json",
                  "cx": 540, "top": 500, "bottom": 1312, "size": (440, 470)},  # めたんと同じ倍率。耳が立っても切れない
+    # つむぎは字幕の右の小さい枠（幅 210px）に、頭から胸までを出す。規約で加工できないので、左右は反転しない
+    "tsumugi": {"model": "assets/live2d/tsumugi/kasukabe_tsumugi.model3.json",
+                "cx": 527, "top": 560, "bottom": 1250, "size": (210, 250)},
 }
 # 使ってよい表情とモーション。衣装替え（pose_costume_*）は台本で指定しても使わない
 DENY = ("pose_costume",)

@@ -14,7 +14,9 @@
   3. voice/dict_common.tsv: シリーズ共通の技術用語
 台本・演出・その回の辞書は episodes/epNN/ に置き、出力は episodes/epNN/out/voice/ に書く。
 英字の語は単語の区切りでだけ置き換える（ini が Gemini に当たらないように）。
-行ごとの演出（スタイル・抑揚・前の間・動き）は direction.tsv で指定する。
+行ごとの演出（スタイル・抑揚・速さ・前の間・動き）は direction.tsv で指定する。speed 列は VOICEVOX の speedScale で、
+空なら話者ごとの既定（SPEAKERS）。
+sound 列に wav（その回のフォルダからの場所）を書くと、その行は声を合成せず、その音を鳴らす（番外編のお囃子）。
 辞書ではどうしても区切りやアクセントが直らない行は、direction.tsv の kana 列に読みを AquesTalk 風の
 カナ（--kana の表示と同じ記法。' がアクセント、/ が区切り、_ が無声化）で書くと、その行だけ置き換える。
 """
@@ -26,6 +28,7 @@ import math
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.parse
 import urllib.request
@@ -46,7 +49,10 @@ SPEAKERS = {
     # 第3弾のデモで voice-chat に話しかける役（冥鳴ひまり）。解説の 2 人と聞き分けやすいよう別の声にし、中央から鳴らす
     "ひまり": {"slug": "himari", "id": 14, "speedScale": 1.0, "pan": 0.0, "sing_id": 3014},
     "つむぎ": {"slug": "tsumugi", "id": 8, "speedScale": 1.0, "pan": 0.0},
+    # 番外編の落語の出囃子・追い出し太鼓。声は合成せず、direction.tsv の sound 列の wav をそのまま鳴らす
+    "お囃子": {"slug": "ohayashi", "id": None, "speedScale": 1.0, "pan": 0.0},
 }
+VOICE_RATE = 24000  # VOICEVOX の出力（16bit モノラル）。sound 列の wav はこれに合わせて読み込む
 GAP_SEC = 0.35  # all.wav で行と行の間に入れる無音（direction.tsv の gap で上書き）
 
 
@@ -107,6 +113,8 @@ def voice_for(r, direction, styles):
         spk["id"] = styles[spk.get("base", r["speaker"])][d["style"]]
     if d.get("intonation"):
         spk["intonationScale"] = float(d["intonation"])
+    if d.get("speed"):  # その行だけ話す速さを変える（番外編の落語から。テンポを上げたい掛け合いに）
+        spk["speedScale"] = float(d["speed"])
     return spk
 
 
@@ -170,6 +178,19 @@ def sing_line(base, spk, score_name):
         json.dump({"accent_phrases": [], "speedScale": 1.0, "prePhonemeLength": 0.0}, f)
 
 
+def sound_line(base, name):
+    """direction.tsv の sound 列の wav（その回のフォルダからの場所）を、声の代わりにその行の音にする。
+    all.wav につなげるよう、VOICEVOX と同じ 24kHz・16bit・モノラルに直す。口パクはしない。"""
+    src = episode.path(name)
+    if not os.path.exists(src):
+        raise SystemExit(f"音のファイルがありません: {src}（番外編のお囃子なら demo/debayashi.py で作る）")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-ar", str(VOICE_RATE), "-ac", "1",
+                    "-sample_fmt", "s16", base + ".wav.tmp.wav"], check=True)
+    os.replace(base + ".wav.tmp.wav", base + ".wav")
+    with open(base + ".json", "w") as f:
+        json.dump({"accent_phrases": [], "speedScale": 1.0, "prePhonemeLength": 0.0}, f)
+
+
 def make_query(text, spk, kana=None):
     q = json.loads(post("/audio_query", {"speaker": spk["id"], "text": text}))
     if kana:
@@ -217,6 +238,8 @@ def main():
 
     if args.kana:
         for r in rows:
+            if direction.get(r["no"], {}).get("sound"):
+                continue
             if args.kana == "all" or any(c.isascii() and c.isalpha() for c in r["text"]):
                 q = make_query(apply_dict(r["text"], direction.get(r["no"], {}).get("yomi"), words, common),
                                voice_for(r, direction, styles), direction.get(r["no"], {}).get("kana"))
@@ -231,6 +254,10 @@ def main():
         if only is None and not args.force and os.path.exists(base + ".wav"):
             continue
         spk = voice_for(r, direction, styles)
+        if direction.get(r["no"], {}).get("sound"):
+            sound_line(base, direction[r["no"]]["sound"])
+            print(f"{no:03d} {r['speaker']}: （音）{direction[r['no']]['sound']}", file=sys.stderr)
+            continue
         if direction.get(r["no"], {}).get("sing"):
             sing_line(base, spk, direction[r["no"]]["sing"])
             print(f"{no:03d} {r['speaker']}: （歌）{direction[r['no']]['sing']}", file=sys.stderr)

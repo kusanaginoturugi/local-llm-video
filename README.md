@@ -44,16 +44,22 @@ YouTube の解説動画シリーズ「ローカル LLM で遊ぼう」を作る�
   - 計測の数字、撮影でつまずいたこと、判断の経緯は `episodes/ep06/notes.md`
   - 第6弾は RTX 3060 の PC で作った（第5弾までは RTX 4070）。この PC にはつむぎの SD 絵がないので、確認用の動画はダミーの絵で組み立てた
 
+- 番外編：めたんとずんだもんの落語『二人癖』（制作中、`episodes/sp01/`）
+  - 原作は柳家小さん（3代目）口演の速記（国立国会図書館デジタルコレクション、保護期間満了）。翻刻は `source/futari-guse.txt`
+  - 台本は `build_script.py`、演出と章は `build_direction.py` から生成する。出囃子と追い出し太鼓は `demo/debayashi.py`（ホルスト「木星」より）
+  - 候補の噺、権利、LLM で現代語訳を試した結果、決めたことは `episodes/sp01/notes.md`
+
 第1〜3弾の制作には Claude Code、画面の撮影には Claude in Chrome を使用しました。第4弾の台本・記事・検証・動画の組み立てには Codex GPT-6-Sol、第5・6弾には Claude Code（Claude Opus 5.5）を使用しました。
 
 ## 構成
 
 回ごとのファイルは `episodes/epNN/` にまとめ、作る回は環境変数 `EPISODE`（例 `EPISODE=ep01`）で選びます。指定がなければいちばん新しい回です。
+番外編は `episodes/sp01/` のように `ep` で始まらない名前で置き、`EPISODE=sp01` で選びます（見た目は今のシリーズと同じ）。
 
 | パス | 中身 |
 | --- | --- |
 | `episodes/epNN/script.tsv` | 台本（行番号・話者・セリフ） |
-| `episodes/epNN/direction.tsv` | 行ごとの演出（声のスタイル・抑揚・前の間・動き・リアクションの SD 絵）と、その行だけの読み（`yomi`） |
+| `episodes/epNN/direction.tsv` | 行ごとの演出（声のスタイル・抑揚・速さ `speed`・前の間・動き・リアクションの SD 絵／Live2D の表情）と、その行だけの読み（`yomi`）。`sound` 列に wav を書くと、その行は声の代わりにその音を鳴らす（番外編のお囃子） |
 | `episodes/epNN/dict.tsv` | この回だけで使う読み |
 | `episodes/epNN/screens.tsv` | 行ごとのセクション名と、台本の「画面」欄 |
 | `episodes/epNN/slides.py` | 行番号ごとに背景に出す画面（表・ターミナル・スクショなど） |
@@ -100,12 +106,14 @@ EPISODE=ep01 python3 video/render.py   # 前の回を作り直す
 
 ### Live2D（第7弾から）
 
-第7弾から、めたんとずんだもんは Live2D で動かします（つむぎは SD 絵のまま）。表情の付け方は `characters.md` の「見た目」を見てください。
+第7弾（と番外編）から、めたん・ずんだもん・つむぎは Live2D で動かします。表情の付け方は `characters.md` の「見た目」を見てください。
 
 ```sh
-# 公式ショップで買った zip を assets/live2d/ に置いて展開する（中のフォルダ名を metan/ と zundamon/ にする）
+# 公式ショップで買った zip と、つむぎの zip（Booth）を assets/live2d/ に置いて展開する
+# （中のフォルダ名を metan/ と zundamon/ と tsumugi/ にする。zip のファイル名は cp932 なので unzip -O cp932）
 #   assets/live2d/metan/shikoku_metan.model3.json
 #   assets/live2d/zundamon/zundamon.model3.json
+#   assets/live2d/tsumugi/kasukabe_tsumugi.model3.json
 python3 -m venv .venv-live2d
 .venv-live2d/bin/pip install live2d-py==1.0.0 glfw PyOpenGL numpy pillow
 ```
@@ -131,7 +139,7 @@ VOICEVOX 本体のユーザー辞書は変更しません。英字の語は単�
 - 音声：VOICEVOX で合成した四国めたん・ずんだもん・春日部つむぎの音声は、[VOICEVOX 利用規約](https://voicevox.hiroshiba.jp/term/)と各音源の利用規約に従います。公開時はクレジット表記「VOICEVOX:四国めたん」「VOICEVOX:ずんだもん」「VOICEVOX:春日部つむぎ」が必要です。
 - イラスト：四国めたん・ずんだもんのイラストは[東北ずん子・ずんだもんプロジェクト](https://zunko.jp/)の公式素材です。[キャラクター利用ガイドライン](https://zunko.jp/guideline.html)に従ってください。再配布を避けるため、画像そのものと口パク差分はリポジトリに含めていません。
 - Live2D モデル：四国めたん・ずんだもん（坂本アヒル式）は[東北ずん子・ずんだもんプロジェクト公式ショップ](https://shop.zunko.jp/)で購入したものです。ローカルの `assets/live2d/` に置き、リポジトリには含めません。
-- 春日部つむぎ：第4弾のSD絵は[KASUKABEproject の公式立ち絵](https://kasukabe294.booth.pm/items/3474402)を参考に生成・編集したものです。画像はリポジトリに含めず、動画に使用します。
+- 春日部つむぎ：Live2D モデル（坂本アヒル式）は [KASUKABEproject の Booth](https://kasukabe294.booth.pm/items/8818575) で無料で配られているものです（加筆・加工しない、個人活動なら収益化してよい、二次配布しない）。ローカルの `assets/live2d/` に置き、リポジトリには含めません。第4弾のSD絵は[KASUKABEproject の公式立ち絵](https://kasukabe294.booth.pm/items/3474402)を参考に生成・編集したものです。画像はリポジトリに含めず、動画に使用します。
 - スクリーンショット：`episodes/ep01/slides/hf-*.png` と `episodes/ep02/slides/hf-whisper-files.png` は Hugging Face の画面、`episodes/ep02/slides/voxtype-github.png` は GitHub の画面です。
 - BGM：[魔王魂](https://maou.audio/)「[アコースティック51](https://maou.audio/bgm_acoustic51/)」（CC BY 4.0）。公開時はクレジット表記「BGM：魔王魂」が必要です。リポジトリには曲ファイルを含めていません。
 - 背景写真：SankalpSasnur「[RGB desktop computer setup with keyboard and monitor](https://commons.wikimedia.org/wiki/File:RGB_desktop_computer_setup_with_keyboard_and_monitor.jpg)」（CC0、Wikimedia Commons）。

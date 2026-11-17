@@ -1,7 +1,8 @@
 """どの回を作るかを決め、その回のファイルの場所を返す。
 
 回ごとのファイルは episodes/ep01/ のように 1 つのフォルダにまとめる。
-作る回は環境変数 EPISODE（例 EPISODE=ep01）で選ぶ。指定がなければいちばん新しい回。
+作る回は環境変数 EPISODE（例 EPISODE=ep01）で選ぶ。指定がなければいちばん新しい回（ep で始まるものから）。
+番外編は episodes/sp01/ のように置き、EPISODE=sp01 で選ぶ。
 """
 import importlib.util
 import os
@@ -9,6 +10,8 @@ import os
 ROOT = os.path.dirname(os.path.abspath(__file__))
 EPISODES = os.path.join(ROOT, "episodes")
 NAME = os.environ.get("EPISODE") or sorted(d for d in os.listdir(EPISODES) if d.startswith("ep"))[-1]
+# 第何弾か。番外編（episodes/sp01/ のように ep で始まらない回）は None で、見た目は今のシリーズと同じにする
+NUMBER = int(NAME[2:]) if NAME.startswith("ep") else None
 DIR = os.path.join(EPISODES, NAME)
 SLIDE_DIR = os.path.join(DIR, "slides")     # 構成図とスクリーンショット
 VOICE_OUT = os.path.join(DIR, "out", "voice")  # 合成した音声とタイムライン

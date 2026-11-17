@@ -1,0 +1,269 @@
+no	speaker	style	intonation	speed	gap	motion	react	sound	yomi	kana	memo
+1	めたん			1.05			pose_microphone				
+2	ずんだもん			1.22			pose_Jaw+mtnBody_think				
+3	つむぎ			1.05			exp_laugh				
+4	めたん			1.05			exp_laugh+mtnBody_point				
+5	ずんだもん			1.22			exp_surprise				
+6	めたん			1.05			exp_wink+mtnBody_point				
+7	ずんだもん			1.22			exp_angry+mtnBody_no				
+8	つむぎ			1.05	0.2		exp_laugh2+mtnFace_laugh				
+9	めたん			1.05			exp_1				
+10	めたん			1.05			exp_laugh				
+11	つむぎ			1.05			pose_pointing				
+12	めたん			1.05							
+13	つむぎ			1.05			exp_angry2				
+14	めたん			1.05			exp_wink+mtnBody_yes				
+15	お囃子				1.0			out/debayashi/open_yose.wav			
+16	ずんだもん			1.28	0.6		exp_smile+mtnBody_wave				
+17	めたん	ツンツン		1.12	0.2		exp_sad+mtnFace_sad				
+18	ずんだもん			1.28	0.15		exp_surprise+mtnFace_surprise				
+19	めたん			1.12	0.2						
+20	ずんだもん			1.28	0.2		pose_cross				
+21	めたん	ツンツン		1.12	0.2		exp_sad				
+22	ずんだもん			1.28	0.2						
+23	めたん			1.12	0.2						
+24	ずんだもん			1.28	0.2		exp_laugh+mtnBody_laugh				
+25	めたん			1.12	0.2						
+26	ずんだもん			1.28	0.2		exp_laugh2				
+27	めたん			1.12	0.2		exp_angry+mtnBody_no				
+28	ずんだもん			1.28	0.2		pose_cross				
+29	めたん			1.12	0.2						
+30	ずんだもん			1.28	0.2						
+31	めたん			1.12	0.2						
+32	ずんだもん			1.28	0.2		exp_angry+mtnBody_point				
+33	めたん			1.12	0.2		exp_1+mtnBody_point				
+34	ずんだもん			1.28	0.2		exp_surprise2+mtnBody_tremble				
+35	めたん			1.12	0.2		exp_laugh2+mtnFace_laugh				
+36	めたん			1.12	0.2						
+37	ずんだもん			1.28	0.2						
+38	めたん			1.12	0.2		exp_1				
+39	ずんだもん			1.28	0.2		exp_angry				
+40	めたん			1.12	0.2		exp_angry+mtnBody_angry				
+41	ずんだもん			1.28	0.2		exp_laugh+mtnBody_point				
+42	めたん			1.12	0.15		exp_surprise				
+43	ずんだもん			1.28	0.2						
+44	めたん			1.12	0.2		exp_1+mtnBody_think				
+45	めたん			1.12	0.2						
+46	ずんだもん			1.28	0.15		pose_Upper				
+47	めたん			1.12	0.2						
+48	ずんだもん			1.28	0.2		exp_smile				
+49	めたん			1.12	0.1		exp_angry				
+50	ずんだもん			1.28	0.3		pose_Upper				
+51	めたん			1.12	0.2		exp_angry2+mtnBody_no				
+52	ずんだもん			1.28	0.2						
+53	めたん			1.12	0.2						
+54	ずんだもん			1.28	0.2		exp_surprise2				
+55	めたん			1.12	0.2		exp_wink+mtnBody_point				
+56	ずんだもん			1.28	0.2						
+57	めたん			1.12	0.5		exp_laugh+mtnBody_yes				
+58	ずんだもん			1.28	0.2						
+59	めたん			1.12	0.2						
+60	ずんだもん			1.28	0.6		exp_laugh2+mtnFace_laugh				
+61	ずんだもん			1.28	0.2		exp_laugh				
+62	ずんだもん	ささやき		1.28	0.2		pose_Jaw+mtnBody_think				
+63	ずんだもん			1.28	1.8		exp_smile+mtnBody_wave				
+64	つむぎ			1.12	0.2		exp_wink				
+65	ずんだもん			1.28	0.2						
+66	つむぎ			1.12	0.2						
+67	ずんだもん			1.28	0.2		exp_shy				
+68	つむぎ			1.12	0.2		exp_1				
+69	ずんだもん			1.28	0.2						
+70	つむぎ			1.12	0.2						
+71	ずんだもん			1.28	0.2		exp_sad2				
+72	つむぎ			1.12	0.2						
+73	ずんだもん			1.28	0.2						
+74	つむぎ			1.12	0.2		exp_angry				
+75	つむぎ			1.12	0.2						
+76	ずんだもん			1.28	0.2		exp_shy				
+77	ずんだもん			1.28	0.2						
+78	つむぎ			1.12	0.2		exp_1+mtnBody_no				
+79	ずんだもん			1.28	0.2		exp_shy2+mtnFace_shy				
+80	つむぎ			1.12	0.2		pose_peacesign				
+81	ずんだもん			1.28	0.2		exp_laugh+mtnBody_yes				
+82	つむぎ			1.12	0.2						
+83	ずんだもん			1.28	0.2		pose_Upper				
+84	つむぎ			1.12	0.2						
+85	ずんだもん			1.28	0.2		exp_laugh				
+86	つむぎ			1.12	0.2						
+87	ずんだもん			1.28	0.2		exp_surprise				
+88	つむぎ			1.12	0.2		exp_angry2+mtnFace_angry				
+89	ずんだもん			1.28	0.2		pose_Jaw+mtnBody_think				
+90	つむぎ			1.12	0.2		pose_pointing+mtnBody_point				
+91	つむぎ			1.12	0.2						
+92	つむぎ			1.12	0.2						
+93	つむぎ			1.12	0.2						
+94	ずんだもん			1.28	0.2		exp_laugh+mtnBody_yes				
+95	つむぎ			1.12	0.2		exp_angry+mtnBody_no				
+96	つむぎ			1.12	0.2						
+97	つむぎ			1.12	0.2		exp_wink				
+98	ずんだもん		1.3	1.28	0.2	jump	exp_laugh2+mtnBody_laugh				
+99	めたん		0.9	1.0	1.2						語り
+100	ずんだもん			1.28	1.0	shake	exp_angry3+mtnBody_angry				
+101	めたん			1.12	0.2		exp_surprise+mtnFace_surprise				
+102	ずんだもん			1.28	0.2						
+103	めたん			1.12	0.2						
+104	ずんだもん			1.28	0.2		exp_angry+mtnBody_point				
+105	めたん			1.12	0.2						
+106	ずんだもん			1.28	0.2		pose_cross				
+107	めたん			1.12	0.2						
+108	ずんだもん			1.28	0.2		pose_Jaw+mtnBody_think				
+109	めたん			1.12	0.2						
+110	ずんだもん			1.28	0.2		exp_surprise2				
+111	めたん			1.12	0.4		exp_surprise+mtnFace_surprise				
+112	ずんだもん			1.28	0.2		exp_sad2				
+113	めたん			1.12	0.3		exp_laugh2+mtnFace_laugh				
+114	ずんだもん			1.28	0.2		exp_angry				
+115	ずんだもん			1.28	0.2						
+116	めたん			1.12	0.2						
+117	ずんだもん			1.28	0.2						
+118	めたん			1.12	0.2						
+119	ずんだもん			1.28	0.2						
+120	めたん			1.12	0.2						
+121	ずんだもん			1.28	0.2		pose_Upper				
+122	めたん			1.12	0.5		exp_angry+mtnBody_point				
+123	ずんだもん			1.28	0.2						
+124	めたん			1.12	0.4		exp_surprise+mtnFace_surprise				
+125	ずんだもん			1.28	0.2		exp_laugh2				
+126	めたん			1.12	0.2		exp_1				
+127	ずんだもん			1.28	0.2		exp_angry+mtnBody_point				
+128	めたん			1.12	0.2		exp_wink				
+129	ずんだもん			1.28	0.2						
+130	めたん			1.12	0.2		pose_Waist				
+131	ずんだもん			1.28	0.2		pose_chop				
+132	めたん			1.12	0.2						
+133	ずんだもん			1.28	0.2						
+134	めたん	ツンツン		1.12	0.2	shake	exp_angry2+mtnBody_angry				
+135	ずんだもん			1.28	0.2		exp_surprise				
+136	めたん			1.12	0.2		exp_sad4				
+137	ずんだもん			1.28	0.4		exp_laugh+mtnBody_laugh				
+138	めたん			1.12	0.15	jump	exp_laugh2+mtnBody_point				
+139	ずんだもん			1.28	0.2	shake	exp_surprise2+mtnBody_tremble				
+140	めたん			1.12	0.2						
+141	ずんだもん			1.28	0.2						
+142	めたん			1.12	0.2		exp_angry+mtnBody_no				
+143	ずんだもん			1.28	0.2						
+144	めたん			1.12	0.2						
+145	ずんだもん			1.28	0.2		exp_sad3				
+146	めたん			1.12	0.2		exp_angry2				
+147	ずんだもん			1.28	0.2						
+148	めたん	ツンツン		1.12	0.2						
+149	ずんだもん			1.28	0.2		exp_sad2				
+150	めたん			1.12	0.2						
+151	ずんだもん			1.28	0.2						
+152	めたん			1.12	0.2		exp_wink				
+153	ずんだもん		1.3	1.28	0.2	shake	exp_angry3+mtnBody_angry				
+154	めたん			1.12	0.7		exp_laugh+mtnFace_laugh				
+155	ずんだもん	なみだめ		1.28	0.3		zunmon_3017				
+156	ずんだもん	なみだめ		1.28	1.8		exp_sad3				
+157	つむぎ			1.12	0.2		exp_laugh+mtnFace_laugh				
+158	ずんだもん			1.28	0.2						
+159	つむぎ			1.12	0.2						
+160	ずんだもん	なみだめ		1.28	0.2		exp_sad2+mtnFace_sad				
+161	つむぎ			1.12	0.2						
+162	ずんだもん			1.28	0.2		exp_sad				
+163	ずんだもん			1.28	0.2						
+164	つむぎ			1.12	0.3		exp_laugh3+mtnBody_laugh				
+165	ずんだもん			1.28	0.2						
+166	ずんだもん			1.28	0.2		exp_angry				
+167	つむぎ			1.12	0.2						
+168	ずんだもん			1.28	0.2						
+169	ずんだもん			1.28	0.2						
+170	つむぎ		1.2	1.12	0.3		exp_laugh2+mtnBody_laugh				
+171	ずんだもん			1.28	0.2		exp_angry+mtnBody_point				
+172	つむぎ			1.12	0.15		exp_angry+mtnBody_no				
+173	ずんだもん			1.28	0.2						
+174	つむぎ			1.12	0.2						
+175	ずんだもん			1.28	0.2		pose_Jaw				
+176	つむぎ			1.12	0.2						
+177	ずんだもん			1.28	0.2		exp_angry3+mtnBody_tremble				
+178	つむぎ			1.12	0.2						
+179	つむぎ			1.12	0.2		exp_1+mtnBody_think				
+180	ずんだもん			1.28	0.2		exp_laugh				
+181	つむぎ			1.12	0.2						
+182	ずんだもん			1.28	0.4		pose_Upper				
+183	つむぎ			1.12	0.15	shake	exp_angry2+mtnBody_angry				
+184	ずんだもん			1.28	0.2						
+185	つむぎ			1.12	0.2						
+186	ずんだもん			1.28	0.2		pose_Jaw+mtnBody_think				
+187	つむぎ			1.12	0.2						
+188	ずんだもん			1.28	0.2		exp_laugh+mtnBody_yes				
+189	つむぎ			1.12	0.2		exp_laugh				
+190	ずんだもん			1.28	0.2		exp_sad				
+191	つむぎ			1.12	0.2						
+192	ずんだもん			1.28	0.2		exp_smile				
+193	つむぎ			1.12	0.2		exp_surprise				
+194	ずんだもん			1.28	0.2						
+195	つむぎ			1.12	0.2						
+196	ずんだもん			1.28	0.2						
+197	つむぎ			1.12	0.2						
+198	ずんだもん			1.28	0.2		exp_smile				
+199	つむぎ			1.12	0.2						
+200	つむぎ			1.12	0.2						
+201	つむぎ			1.12	0.2						
+202	ずんだもん			1.28	0.2		exp_laugh+mtnBody_yes				
+203	つむぎ			1.12	0.2						
+204	ずんだもん			1.28	0.2		exp_laugh2				
+205	つむぎ			1.12	0.2						
+206	つむぎ			1.12	0.2						
+207	つむぎ			1.12	0.2		pose_pointing				
+208	つむぎ			1.12	0.2						
+209	ずんだもん		1.3	1.28	0.2	jump	exp_laugh2+mtnBody_laugh				
+210	つむぎ			1.12	0.2						
+211	ずんだもん			1.28	0.2		pose_Upper				
+212	つむぎ			1.12	0.2						
+213	つむぎ			1.12	0.2		pose_peacesign				
+214	ずんだもん			1.28	0.2						
+215	つむぎ			1.12	0.2						
+216	ずんだもん			1.28	0.2		exp_smile+mtnBody_wave				
+217	めたん		0.9	1.0	1.2						語り
+218	ずんだもん			1.28	1.0		pose_chop+mtnBody_think				
+219	めたん			1.12	0.2		exp_laugh				
+220	ずんだもん			1.28	0.2		pose_Jaw+mtnBody_think				
+221	めたん			1.12	0.2		exp_surprise				
+222	ずんだもん			1.28	0.2		pose_chop				
+223	めたん			1.12	0.2		exp_1+mtnBody_point				
+224	ずんだもん			1.28	0.2		exp_laugh				
+225	めたん			1.12	0.2		exp_1				
+226	ずんだもん	ささやき		1.28	0.3		exp_laugh2+mtnFace_laugh				
+227	めたん			1.12	0.2		exp_1+mtnBody_think				
+228	めたん			1.12	0.2		exp_angry+mtnBody_point				
+229	めたん			1.12	0.2		exp_laugh2+mtnFace_laugh				
+230	ずんだもん			1.28	0.2		exp_sad				
+231	めたん			1.12	0.2						
+232	ずんだもん			1.28	0.2		exp_smile				
+233	めたん			1.12	0.2		exp_1+mtnBody_think				
+234	ずんだもん			1.28	0.2		exp_surprise2+mtnBody_tremble				
+235	めたん			1.12	0.2		exp_angry				
+236	ずんだもん			1.28	0.2		pose_Jaw				
+237	めたん			1.12	0.2		exp_1				
+238	ずんだもん			1.28	0.3		exp_laugh+mtnBody_yes				
+239	めたん			1.12	0.2		exp_1+mtnBody_think				
+240	ずんだもん			1.28	0.2		exp_laugh2				
+241	めたん			1.12	0.6		exp_sad4+mtnBody_think				
+242	ずんだもん			1.28	0.8		exp_laugh2+mtnFace_laugh				
+243	めたん			1.12	0.2		exp_1+mtnBody_think				
+244	ずんだもん			1.28	0.2		exp_laugh2+mtnBody_point				
+245	めたん			1.0	1.0		exp_sad+mtnFace_sad				
+246	ずんだもん		1.3	1.28	0.1	jump	exp_laugh2+mtnBody_laugh				
+247	めたん			1.12	0.2		exp_surprise+mtnFace_surprise				
+248	ずんだもん			1.28	0.2		exp_laugh+mtnBody_wave				
+249	めたん			1.12	0.2	shake	exp_angry2+mtnBody_angry				
+250	ずんだもん			1.28	0.2		exp_angry				
+251	めたん			1.12	0.2		exp_sad4				
+252	ずんだもん			1.28	0.2						
+253	めたん			1.12	0.2		exp_sad3+mtnBody_no				
+254	ずんだもん		1.3	1.28	0.2	jump	exp_laugh2+mtnBody_laugh				
+255	めたん			1.12	0.5	jump	exp_wink+mtnBody_point				
+256	つむぎ			1.05	2.0		exp_surprise2+mtnFace_surprise				
+257	めたん			1.05			exp_wink				
+258	ずんだもん	なみだめ		1.22			exp_sad3+mtnFace_sad				
+259	つむぎ			1.05			exp_laugh+mtnFace_laugh				
+260	めたん			1.05			exp_1				
+261	ずんだもん		1.3	1.22		jump	pose_Upper				
+262	めたん			1.05	0.4		exp_sad4				
+263	つむぎ			1.05			exp_angry+mtnBody_no				
+264	めたん			1.05			exp_1+mtnBody_yes				
+265	ずんだもん	ヘロヘロ		1.22	0.5		exp_sad3				
+266	めたん			1.05	1.0		exp_laugh+mtnBody_yes				
+267	ずんだもん		1.2	1.22		jump	exp_laugh+mtnBody_wave				
+268	お囃子				0.8			out/debayashi/close_yose.wav			

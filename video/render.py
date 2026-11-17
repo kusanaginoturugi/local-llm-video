@@ -36,12 +36,13 @@ SIDE = 440                         # 左右のキャラの列の幅（左右で�
 SLIDE_BOX = (80, 64, W - 80, 812)   # 画面（スライド）を置く範囲。下の角にはキャラが少しかぶる
 SUB_BOX = (SIDE, 828, W - SIDE, 1052)  # 字幕
 TSUMUGI_W = 210                     # 第5弾から：字幕の右に、つむぎの立つ場所を空ける
-TSUMUGI_REGULAR = int(episode.NAME[2:]) >= 5  # つむぎは第5弾から本編のレギュラー
+# つむぎは第5弾から本編のレギュラー。番外編（episode.NUMBER が None）も今のシリーズと同じ
+TSUMUGI_REGULAR = episode.NUMBER is None or episode.NUMBER >= 5
 if TSUMUGI_REGULAR:
     SUB_BOX = (SIDE, 828, W - SIDE - TSUMUGI_W, 1052)
 # 第7弾から、めたんとずんだもんは Live2D（公式ショップの坂本アヒル式）で動かす。つむぎは SD 絵のまま。
 # direction.tsv の react には、SD 絵の名前の代わりに Live2D の表情・モーションの名前を + でつないで書く（例 exp_sad+mtnFace_sad）
-LIVE2D = int(episode.NAME[2:]) >= 7
+LIVE2D = episode.NUMBER is None or episode.NUMBER >= 7
 LIVE2D_PY = os.path.join(ROOT, ".venv-live2d", "bin", "python")
 BG = (24, 26, 33)
 PANEL = (40, 43, 54)
@@ -50,11 +51,13 @@ MUTED = (150, 156, 172)
 HL = (255, 214, 102)
 COLOR = {"めたん": (234, 96, 160), "ずんだもん": (110, 190, 70),
          "パソコンのめたん": (234, 96, 160), "パソコンのずんだもん": (110, 190, 70),
-         "ひまり": (150, 140, 230), "つむぎ": (235, 173, 80)}
+         "ひまり": (150, 140, 230), "つむぎ": (235, 173, 80), "お囃子": (190, 160, 110)}
 SLUG = {"めたん": "metan", "ずんだもん": "zundamon"}
+# Live2D で動かすキャラ（第7弾と番外編から）。つむぎも坂本アヒル式の Live2D にした
+L2D_SLUG = {**SLUG, "つむぎ": "tsumugi"}
 # 音声ファイルの名前。「パソコンの〜」は第3弾のデモで返事をする voice-chat のキャラ（立ち絵は動かさない）
 VOICE_SLUG = {**SLUG, "パソコンのめたん": "pc_metan", "パソコンのずんだもん": "pc_zundamon",
-              "ひまり": "himari", "つむぎ": "tsumugi"}
+              "ひまり": "himari", "つむぎ": "tsumugi", "お囃子": "ohayashi"}
 FADE = 0.4  # 章の変わり目で、見出しの前後をフェードでつなぐ秒数
 ANNOTATE_ONCE = True  # False にすると、用語が出るたびに毎回読みを添える
 BGM = os.path.join(ROOT, "assets", "bgm", "maou_loop_bgm_acoustic51.mp3")  # 魔王魂「アコースティック51」ループ版
@@ -419,7 +422,7 @@ def check_live2d_react(no, speaker, react):
     if is_sd_react(react):
         return
     import live2d_frames
-    exps, motions = live2d_frames.model_vocab(SLUG[speaker])
+    exps, motions = live2d_frames.model_vocab(L2D_SLUG[speaker])
     names = react.split("+")
     bad = [n for n in names if n not in exps | motions]
     if not bad and (sum(n in exps for n in names) > 1 or sum(n in motions for n in names) > 1):
@@ -437,17 +440,17 @@ class Live2DStream:
         if not os.path.exists(LIVE2D_PY):
             raise SystemExit("第7弾からは Live2D を使います。README の「Live2D」の手順で .venv-live2d を作ってください")
         plan = {"fps": FPS, "start": start, "count": count, "lines": [
-            {"slug": SLUG[l["speaker"]], "start": l["start"], "end": l["end"],
-             "wav": os.path.join(VOICE, f"{l['no']:03d}_{SLUG[l['speaker']]}.wav"),
+            {"slug": L2D_SLUG[l["speaker"]], "start": l["start"], "end": l["end"],
+             "wav": os.path.join(VOICE, f"{l['no']:03d}_{L2D_SLUG[l['speaker']]}.wav"),
              "react": l["react"].split("+") if l["react"] and not is_sd_react(l["react"]) else []}
-            for l in lines if l["speaker"] in SLUG]}
+            for l in lines if l["speaker"] in L2D_SLUG]}
         self.plan = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
         json.dump(plan, self.plan)
         self.plan.close()
         self.proc = subprocess.Popen([LIVE2D_PY, os.path.join(ROOT, "video", "live2d_frames.py"), self.plan.name],
                                      stdout=subprocess.PIPE)
         sizes = json.loads(self.proc.stdout.readline())
-        self.sizes = [(name, tuple(sizes[slug])) for name, slug in SLUG.items()]
+        self.sizes = [(name, tuple(sizes[slug])) for name, slug in L2D_SLUG.items()]
 
     def next(self):
         frame = {}
@@ -538,7 +541,7 @@ def load_lines():
             q = json.load(f)
         if r["speaker"] == "つむぎ" and reacts.get(r["no"]) in ("angry", "happy"):
             mood = reacts[r["no"]]
-        if LIVE2D and r["speaker"] in SLUG and reacts.get(r["no"]):
+        if LIVE2D and r["speaker"] in L2D_SLUG and reacts.get(r["no"]):
             check_live2d_react(no, r["speaker"], reacts[r["no"]])
         lines.append({
             "no": no, "speaker": r["speaker"], "text": r["text"],
@@ -547,7 +550,8 @@ def load_lines():
             "motion": r.get("motion", ""),
             "react": reacts.get(r["no"], ""),
             "tsumugi": mood,
-            "sing": bool(direction.get(r["no"], {}).get("sing")),
+            # 歌の行と、番外編のお囃子の行（sound 列）は、BGM を絞る
+            "sing": bool(direction.get(r["no"], {}).get("sing") or direction.get(r["no"], {}).get("sound")),
             "track": mouth_track(q, float(r["start"])),
         })
     annotate(lines)
@@ -662,7 +666,18 @@ def frame_at(base, line, t, chars, talking=True, state=None, l2d=None):
         dy = motion_offset(line["motion"], t - line["start"])[1] if line["speaker"] == "つむぎ" else 0
         img.paste(im, ((W - im.width) // 2, 805 - im.height + dy), im)
     # 第5弾からのつむぎは最初から本編にいる。字幕の右の空き（ずんだもんの隣）に立ち、しゃべっていないときは二人と同じく暗くする
-    if TSUMUGI_REGULAR:
+    if TSUMUGI_REGULAR and l2d:
+        # 第7弾と番外編から：つむぎも Live2D。表情と口は live2d_frames.py が動かす。しゃべるときは 2 人と同じく弾む
+        im = l2d["つむぎ"]
+        dy = 0
+        if talking and line["speaker"] == "つむぎ":
+            _, _, dy, scale = state or speaker_state(line, t)
+            if scale != 1.0:
+                im = im.resize((round(im.width * scale), round(im.height * scale)), Image.BILINEAR)
+        elif talking:
+            im = dimmed(im)
+        img.paste(im, (SUB_BOX[2] + (TSUMUGI_W - im.width) // 2, H - 8 - im.height + dy), im)
+    elif TSUMUGI_REGULAR:
         speaking = talking and line["speaker"] == "つむぎ"
         im = chars[f"つむぎ-{line['tsumugi']}" + ("" if speaking or not talking else "-dim")]
         dy = motion_offset(line["motion"], t - line["start"])[1] if speaking else 0

@@ -221,7 +221,9 @@ def yose(wav):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-filter_complex", YOSE, "-map", "[out]", tmp],
                    check=True)
     gain = peak_db(wav) - peak_db(tmp)
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp, "-af", f"volume={gain}dB", out], check=True)
+    # 後ろの残響の無音（2 秒あまり）は切る。動画では、次の行との間を direction.tsv の gap で決める
+    trim = "areverse,silenceremove=start_periods=1:start_threshold=-55dB,areverse"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp, "-af", f"volume={gain}dB,{trim}", out], check=True)
     os.remove(tmp)
     print(out)
 
